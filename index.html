@@ -8,10 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
-        // =========================================================
-        // URL DO GOOGLE APPS SCRIPT CONFIGURADA:
-        // =========================================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbw9WeSxbUQLb20K3D_1LTzG62yMobLu3PbH00iulG1gcWN98WmCy-ARBgn6SWqWQmzE/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbyuU-eYnizW1AupjdzvyKYI-mf4RdJWyqFm2nEzlyk/exec";
 
         tailwind.config = {
             darkMode: 'class',
@@ -201,34 +198,17 @@
             
             <form id="personnel-form" onsubmit="savePersonnel(event)" class="p-6 space-y-4">
                 <input type="hidden" id="edit-id">
+                <input type="hidden" id="edit-row-index">
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">Posto / Graduação</label>
-                        <select id="form-grad" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                            <option value="Cel PM">Cel PM</option>
-                            <option value="Ten Cel PM">Ten Cel PM</option>
-                            <option value="Maj PM">Maj PM</option>
-                            <option value="Cap PM">Cap PM</option>
-                            <option value="1º Ten PM">1º Ten PM</option>
-                            <option value="2º Ten PM">2º Ten PM</option>
-                            <option value="Sub Ten PM">Sub Ten PM</option>
-                            <option value="1º Sgt PM">1º Sgt PM</option>
-                            <option value="2º Sgt PM">2º Sgt PM</option>
-                            <option value="3º Sgt PM">3º Sgt PM</option>
-                            <option value="Cb PM">Cb PM</option>
-                            <option value="Sd PM" selected>Sd PM</option>
-                        </select>
+                        <input type="text" id="form-grad" required placeholder="Ex: 1º Sgt PM, Ten Cel PM" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">Unidade</label>
-                        <select id="form-unit" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                            <option value="5º CR - Sede">5º CR - Sede</option>
-                            <option value="2º BPM">2º BPM</option>
-                            <option value="13º BPM">13º BPM</option>
-                            <option value="CPA">CPA</option>
-                        </select>
+                        <input type="text" id="form-unit" required placeholder="Ex: 5º CR - Sede, 2º BPM" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
                     </div>
                 </div>
 
@@ -244,7 +224,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">RG Militar</label>
-                        <input type="text" id="form-rg" required placeholder="882.986" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
+                        <input type="text" id="form-rg" placeholder="882.986" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
                     </div>
                 </div>
 
@@ -270,7 +250,9 @@
 
                 <div class="flex justify-end space-x-3 pt-3 border-t border-slate-200 dark:border-slate-700">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-900 font-bold rounded-lg text-sm shadow">Salvar Dados</button>
+                    <button type="submit" id="btn-save" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-900 font-bold rounded-lg text-sm shadow flex items-center gap-2">
+                        <span>Salvar Dados</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -292,6 +274,7 @@
                 if (rawList && rawList.length > 0) {
                     personnelList = rawList.map((item, idx) => ({
                         id: String(idx + 1),
+                        _rowIndex: item._rowIndex || null,
                         grad: item.POST_GRAD || item.POSTO_GRAD || item.grad || 'Sd PM',
                         name: item.NOME_COMPLETO || item.NOME || item.name || '',
                         re: String(item.RE || item.re || ''),
@@ -301,14 +284,14 @@
                         returnDate: item.RETORNO || item.returnDate || '',
                         notes: item.OBSERVACAO || item.notes || ''
                     }));
-                    saveData();
+                    saveDataLocal();
                 }
             } catch (err) {
                 console.error("Erro ao carregar planilha:", err);
             }
         }
 
-        function saveData() {
+        function saveDataLocal() {
             localStorage.setItem('pm_efetivo_data', JSON.stringify(personnelList));
             updateDashboard();
             renderTable();
@@ -434,32 +417,65 @@
             document.getElementById('modal-form').classList.add('hidden');
             document.getElementById('personnel-form').reset();
             document.getElementById('edit-id').value = '';
+            document.getElementById('edit-row-index').value = '';
         }
 
-        function savePersonnel(e) {
+        async function savePersonnel(e) {
             e.preventDefault();
+            const btnSave = document.getElementById('btn-save');
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando na Planilha...';
+
             const id = document.getElementById('edit-id').value;
-            const newEntry = {
-                id: id || Date.now().toString(),
-                grad: document.getElementById('form-grad').value,
-                unit: document.getElementById('form-unit').value,
-                name: document.getElementById('form-name').value,
-                re: document.getElementById('form-re').value,
-                rg: document.getElementById('form-rg').value,
-                status: document.getElementById('form-status').value,
-                returnDate: document.getElementById('form-return').value,
-                notes: document.getElementById('form-notes').value,
+            const rowIndex = document.getElementById('edit-row-index').value;
+
+            const payload = {
+                _rowIndex: rowIndex ? parseInt(rowIndex) : null,
+                POST_GRAD: document.getElementById('form-grad').value,
+                UNIDADE: document.getElementById('form-unit').value,
+                NOME_COMPLETO: document.getElementById('form-name').value,
+                RE: document.getElementById('form-re').value,
+                RG: document.getElementById('form-rg').value,
+                STATUS: document.getElementById('form-status').value,
+                RETORNO: document.getElementById('form-return').value,
+                OBSERVACAO: document.getElementById('form-notes').value
             };
 
+            // 1. Atualiza localmente imediatamente
             if (id) {
                 const index = personnelList.findIndex(p => p.id === id);
-                if (index !== -1) personnelList[index] = newEntry;
-            } else {
-                personnelList.push(newEntry);
+                if (index !== -1) {
+                    personnelList[index] = {
+                        ...personnelList[index],
+                        grad: payload.POST_GRAD,
+                        unit: payload.UNIDADE,
+                        name: payload.NOME_COMPLETO,
+                        re: payload.RE,
+                        rg: payload.RG,
+                        status: payload.STATUS,
+                        returnDate: payload.RETORNO,
+                        notes: payload.OBSERVACAO
+                    };
+                }
+            }
+            saveDataLocal();
+
+            // 2. Envia para a planilha via POST
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.error("Erro ao enviar para o Google Sheets:", err);
             }
 
-            saveData();
+            btnSave.disabled = false;
+            btnSave.innerHTML = 'Salvar Dados';
             closeModal();
+            setTimeout(carregarDadosPlanilha, 1000);
         }
 
         function editPersonnel(id) {
@@ -467,12 +483,13 @@
             if (!p) return;
 
             document.getElementById('edit-id').value = p.id;
-            document.getElementById('form-grad').value = p.grad;
-            document.getElementById('form-unit').value = p.unit;
-            document.getElementById('form-name').value = p.name;
-            document.getElementById('form-re').value = p.re;
-            document.getElementById('form-rg').value = p.rg;
-            document.getElementById('form-status').value = p.status;
+            document.getElementById('edit-row-index').value = p._rowIndex || '';
+            document.getElementById('form-grad').value = p.grad || '';
+            document.getElementById('form-unit').value = p.unit || '';
+            document.getElementById('form-name').value = p.name || '';
+            document.getElementById('form-re').value = p.re || '';
+            document.getElementById('form-rg').value = p.rg || '';
+            document.getElementById('form-status').value = p.status || 'PRONTO';
             document.getElementById('form-return').value = p.returnDate || '';
             document.getElementById('form-notes').value = p.notes || '';
 
@@ -482,7 +499,7 @@
         function deletePersonnel(id) {
             if (confirm('Tem certeza que deseja remover este policial da lista?')) {
                 personnelList = personnelList.filter(p => p.id !== id);
-                saveData();
+                saveDataLocal();
             }
         }
 
