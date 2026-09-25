@@ -9,9 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         // =========================================================
-        // INSIRA O SEU LINK DO GOOGLE APPS SCRIPT NA LINHA ABAIXO:
+        // URL DO GOOGLE APPS SCRIPT CONFIGURADA:
         // =========================================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbyuU-eYnizWIAupjdzvyKYl-mf4RdJWyqFm2nEzlyk/dev";
+        const API_URL = "https://script.google.com/macros/s/AKfycbyuU-eYnizW1AupjdzvyKYI-mf4RdJWyqFm2nEzlyk/exec";
 
         tailwind.config = {
             darkMode: 'class',
@@ -281,10 +281,7 @@
         let currentStatusFilter = 'ALL';
 
         async function carregarDadosPlanilha() {
-            if (!API_URL || API_URL === "COLE_AQUI_A_SUA_URL_DO_APPS_SCRIPT") {
-                console.log("URL da API do Google Sheets não informada.");
-                return;
-            }
+            if (!API_URL) return;
 
             try {
                 const response = await fetch(API_URL);
@@ -300,7 +297,7 @@
                         re: String(item.RE || item.re || ''),
                         rg: String(item.RG || item.rg || ''),
                         unit: item.UNIDADE || item.unit || '5º CR - Sede',
-                        status: (item.STATUS || item.status || 'PRONTO').toUpperCase(),
+                        status: String(item.STATUS || item.status || 'PRONTO').toUpperCase(),
                         returnDate: item.RETORNO || item.returnDate || '',
                         notes: item.OBSERVACAO || item.notes || ''
                     }));
