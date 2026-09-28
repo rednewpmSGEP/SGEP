@@ -3,605 +3,242 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SGEP - 5º Comando Regional PMMT</title>
-  
-  <!-- Estilos Bootstrap 5 e Ícones FontAwesome -->
+  <title>5º COMANDO REGIONAL - Gestão de Efetivo e Prontidão</title>
+  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
   <style>
-    /* ESTILOS GERAIS DA INTERFACE */
     body {
-      background-color: #f4f6f9;
+      background-color: #0b1325;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .navbar-custom {
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: #fff;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
-
-    .card-kpi {
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-      transition: transform 0.2s;
-    }
-    .card-kpi:hover {
-      transform: translateY(-3px);
-    }
-
-    /* ESTILO DA TELA DE LOGIN */
-    #tela-login {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(135deg, #0b1325, #1c2a48);
-      z-index: 9999;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin: 0;
     }
-    .box-login {
+    .login-card {
       background: #ffffff;
-      padding: 2.5rem;
-      border-radius: 16px;
+      border-radius: 12px;
+      padding: 35px;
+      width: 100%;
       max-width: 420px;
-      width: 90%;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      text-align: center;
     }
-
-    /* ESTILO DO CARTÃO / FICHA 3X4 DO POLICIAL */
-    .foto-militar-3x4 {
-      width: 130px;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 3px solid #1c2a48;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    .shield-icon {
+      font-size: 45px;
+      color: #0d6efd;
+      margin-bottom: 10px;
     }
-    .militar-card-header {
-      background-color: #1c2a48;
-      color: white;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
+    .btn-custom {
+      background-color: #0d6efd;
+      border: none;
+      font-weight: 600;
+      padding: 12px;
     }
-
-    /* TAGS DE STATUS COLORIDAS */
-    .badge-status {
-      font-size: 0.85rem;
-      padding: 0.4em 0.8em;
-      border-radius: 20px;
+    .btn-custom:hover {
+      background-color: #0b5ed7;
     }
-    .status-pronto { background-color: #198754; color: white; }
-    .status-ferias { background-color: #ffc107; color: #000; }
-    .status-lts { background-color: #dc3545; color: white; }
-    .status-licenca { background-color: #fd7e14; color: white; }
-    .status-curso { background-color: #0dcaf0; color: #000; }
-    .status-inativo { background-color: #6c757d; color: white; }
+    #dashboard-view {
+      display: none;
+      width: 100%;
+      max-width: 900px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 30px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- ========================================== -->
-  <!-- TELA DE LOGIN / AUTENTICAÇÃO POR CPF       -->
-  <!-- ========================================== -->
-  <div id="tela-login">
-    <div class="box-login text-center">
-      <div class="mb-3">
-        <i class="fa-solid fa-shield-halved fa-3x text-primary"></i>
-      </div>
-      <h4 class="fw-bold mb-1">5º COMANDO REGIONAL</h4>
-      <p class="text-muted small mb-4">Sistema de Gestão de Efetivo e Prontidão</p>
-      
-      <div id="alerta-login" class="alert alert-danger d-none" role="alert"></div>
-
-      <form id="form-login" onsubmit="efetuarLogin(event)">
-        <div class="form-floating mb-3 text-start">
-          <input type="text" class="form-control" id="login-cpf" placeholder="CPF" required>
-          <label for="login-cpf"><i class="fa-solid fa-id-card me-2"></i>CPF (Apenas Números)</label>
-        </div>
-        <div class="form-floating mb-3 text-start">
-          <input type="password" class="form-control" id="login-senha" placeholder="Senha" required>
-          <label for="login-senha"><i class="fa-solid fa-lock me-2"></i>Senha</label>
-        </div>
-        <button type="submit" id="btn-entrar" class="btn btn-primary w-100 py-2 fw-bold">
-          <i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA
-        </button>
-      </form>
+  <!-- ================= TELA DE LOGIN ================= -->
+  <div id="login-view" class="login-card">
+    <div class="shield-icon">
+      <i class="fa-solid fa-shield-halved"></i>
     </div>
+    <h4 class="fw-bold mb-1">5º COMANDO REGIONAL</h4>
+    <p class="text-muted small mb-4">Sistema de Gestão de Efetivo e Prontidão</p>
+
+    <!-- Alerta de Erro -->
+    <div id="alerta-login" class="alert alert-danger p-2 small d-none" role="alert"></div>
+
+    <form onsubmit="efetuarLogin(event)">
+      <div class="mb-3 text-start">
+        <label for="login-cpf" class="form-label text-muted small fw-bold">CPF (Apenas Números)</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fa-solid fa-address-card"></i></span>
+          <input type="text" class="form-control" id="login-cpf" placeholder="Digite seu CPF" required maxlength="11">
+        </div>
+      </div>
+
+      <div class="mb-4 text-start">
+        <label for="login-senha" class="form-label text-muted small fw-bold">Senha</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+          <input type="password" class="form-control" id="login-senha" placeholder="Digite sua senha" required>
+        </div>
+      </div>
+
+      <button type="submit" id="btn-entrar" class="btn btn-primary btn-custom w-100">
+        <i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA
+      </button>
+    </form>
   </div>
 
-  <!-- ========================================== -->
-  <!-- CONTEÚDO PRINCIPAL DO DASHBOARD             -->
-  <!-- ========================================== -->
-  <div id="conteudo-dashboard" class="d-none">
-    
-    <!-- BARRA SUPERIOR (NAVBAR) -->
-    <nav class="navbar navbar-expand-lg navbar-custom px-4 py-3">
-      <div class="container-fluid">
-        <a class="navbar-brand text-white fw-bold d-flex align-items-center" href="#">
-          <i class="fa-solid fa-shield-halved me-2"></i>
-          5º COMANDO REGIONAL - PMMT
-        </a>
-        <div class="d-flex align-items-center text-white gap-3">
-          <span id="usuario-saudacao" class="small"></span>
-          <button class="btn btn-outline-light btn-sm" onclick="fazerLogout()">
-            <i class="fa-solid fa-power-off me-1"></i>Sair
-          </button>
-        </div>
-      </div>
-    </nav>
-
-    <div class="container-fluid px-4 py-4">
-      
-      <!-- CONTROLES SUPERIORES: FILTRO DE UNIDADES E BUSCA -->
-      <div class="row mb-4 align-items-center">
-        <div class="col-md-5 mb-2 mb-md-0">
-          <label class="form-label fw-bold text-secondary mb-1"><i class="fa-solid fa-building-shield me-1"></i>Selecionar Unidade:</label>
-          <select id="seletor-unidade" class="form-select form-select-lg shadow-sm" onchange="aplicarFiltros()">
-            <option value="TODAS">TODAS AS UNIDADES (5º CR - VISÃO GERAL)</option>
-            <option value="5º COMANDO REGIONAL (5º CR)">5º COMANDO REGIONAL (5º CR)</option>
-            <option value="2º BATALHÃO DE POLÍCIA MILITAR (2º BPM)">2º BATALHÃO DE POLÍCIA MILITAR (2º BPM)</option>
-            <option value="PEL PM DE NOVO SÃO JOAQUIM">PEL PM DE NOVO SÃO JOAQUIM</option>
-            <option value="NPM DE PAREDÃO DO LESTE">NPM DE PAREDÃO DO LESTE</option>
-            <option value="NPM DE GAL CARNEIRO">NPM DE GAL CARNEIRO</option>
-            <option value="NPM DE ITAQUERÊ">NPM DE ITAQUERÊ</option>
-            <option value="NPM DE INDIANÓPOLIS">NPM DE INDIANÓPOLIS</option>
-            <option value="NPM DE ARAGUAIANA">NPM DE ARAGUAIANA</option>
-            <option value="NPM DE TORIXOREU">NPM DE TORIXOREU</option>
-            <option value="NPM DE RIBEIRÃOZINHO">NPM DE RIBEIRÃOZINHO</option>
-            <option value="NPM DE PONTAL DO ARAGUAIA">NPM DE PONTAL DO ARAGUAIA</option>
-          </select>
-        </div>
-
-        <div class="col-md-4 mb-2 mb-md-0">
-          <label class="form-label fw-bold text-secondary mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i>Pesquisar Militar:</label>
-          <input type="text" id="campo-busca" class="form-control form-control-lg shadow-sm" placeholder="Nome, Matrícula, CPF ou Posto..." onkeyup="aplicarFiltros()">
-        </div>
-
-        <div class="col-md-3 text-md-end mt-md-4">
-          <button class="btn btn-success btn-lg w-100 shadow-sm" onclick="carregarDadosServidor()">
-            <i class="fa-solid fa-rotate me-2"></i>Sincronizar
-          </button>
-        </div>
-      </div>
-
-      <!-- CARTOES DE INDICADORES (KPIS) -->
-      <div class="row g-3 mb-4">
-        <div class="col-md-3">
-          <div class="card card-kpi bg-white p-3 border-start border-4 border-primary">
-            <div class="text-muted small fw-bold">EFETIVO ATIVO TOTAL</div>
-            <div id="kpi-total" class="h2 fw-bold text-dark mb-0">0</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card card-kpi bg-white p-3 border-start border-4 border-success">
-            <div class="text-muted small fw-bold">PRONTO NA SEDE</div>
-            <div id="kpi-pronto" class="h2 fw-bold text-success mb-0">0</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card card-kpi bg-white p-3 border-start border-4 border-warning">
-            <div class="text-muted small fw-bold">FÉRIAS / LICENÇAS</div>
-            <div id="kpi-afastados" class="h2 fw-bold text-warning mb-0">0</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card card-kpi bg-white p-3 border-start border-4 border-secondary">
-            <div class="text-muted small fw-bold">RESERVA / TRANSFERIDOS</div>
-            <div id="kpi-inativos" class="h2 fw-bold text-secondary mb-0">0</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TABELA DE MILITARES -->
-      <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-dark">
-                <tr>
-                  <th>MATRÍCULA</th>
-                  <th>POSTO/GRAD</th>
-                  <th>NOME COMPLETO</th>
-                  <th>NOME DE GUERRA</th>
-                  <th>UNIDADE</th>
-                  <th>SITUAÇÃO / STATUS</th>
-                  <th>PERÍODO / RETORNO</th>
-                  <th class="text-center">AÇÕES</th>
-                </tr>
-              </thead>
-              <tbody id="tabela-corpo">
-                <tr>
-                  <td colspan="8" class="text-center py-4 text-muted">
-                    <i class="fa-solid fa-spinner fa-spin me-2"></i>Carregando dados do efetivo...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MODAL: FICHA DO POLICIAL (CARTÃO 3X4)       -->
-  <!-- ========================================== -->
-  <div class="modal fade" id="modalFichaMilitar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content border-0 rounded-3 shadow">
-        <div class="modal-header militar-card-header px-4 py-3">
-          <h5 class="modal-title fw-bold" id="modal-titulo">FICHA FUNCIONAL DO MILITAR</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="row align-items-center mb-4">
-            <!-- FOTO 3X4 E NOME DE GUERRA ABAIXO DA FOTO -->
-            <div class="col-md-4 text-center border-end">
-              <img id="ficha-foto" src="" class="foto-militar-3x4 mb-2" alt="Foto 3x4">
-              <div id="ficha-posto-guerra" class="fw-bold text-primary h5 mb-0"></div>
-              <small class="text-muted">Nome de Identificação</small>
-            </div>
-            <!-- DADOS CADASTRAIS DIVEROS -->
-            <div class="col-md-8">
-              <h4 id="ficha-nome-completo" class="fw-bold mb-3"></h4>
-              <div class="row g-2">
-                <div class="col-6"><strong>Matrícula:</strong> <span id="ficha-matricula"></span></div>
-                <div class="col-6"><strong>CPF:</strong> <span id="ficha-cpf"></span></div>
-                <div class="col-6"><strong>RG Militar:</strong> <span id="ficha-rg"></span></div>
-                <div class="col-6"><strong>RE:</strong> <span id="ficha-re"></span></div>
-                <div class="col-6"><strong>Data Inclusão:</strong> <span id="ficha-inclusao"></span></div>
-                <div class="col-6"><strong>Nota Antiguidade:</strong> <span id="ficha-nota"></span></div>
-                <div class="col-12 mt-2"><strong>Unidade:</strong> <span id="ficha-unidade" class="badge bg-secondary"></span></div>
-              </div>
-            </div>
-          </div>
-
-          <hr>
-
-          <!-- SITUAÇÃO E AFASTAMENTO -->
-          <div class="row g-2">
-            <div class="col-md-6">
-              <label class="fw-bold text-muted small">STATUS ATUAL:</label>
-              <div id="ficha-status"></div>
-            </div>
-            <div class="col-md-6">
-              <label class="fw-bold text-muted small">PREVISÃO DE RETORNO:</label>
-              <div id="ficha-retorno" class="fw-bold text-dark"></div>
-            </div>
-            <div class="col-12 mt-2">
-              <label class="fw-bold text-muted small">OBSERVAÇÕES:</label>
-              <p id="ficha-obs" class="bg-light p-2 rounded text-secondary mb-0"></p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer bg-light px-4">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          <button type="button" class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i>Imprimir Ficha</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MODAL: ALTERAÇÃO DE SENHA (1º ACESSO)       -->
-  <!-- ========================================== -->
-  <div class="modal fade" id="modalTrocaSenha" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+  <!-- ================= MODAL PRIMEIRO ACESSO ================= -->
+  <div class="modal fade" id="modalTrocaSenha" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header bg-warning text-dark">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-key me-2"></i>Primeiro Acesso - Troca de Senha</h5>
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-key me-2"></i>Primeiro Acesso - Cadastrar Nova Senha</h5>
         </div>
         <div class="modal-body">
-          <p class="small text-muted">Por segurança, é obrigatório cadastrar uma nova senha pessoal no primeiro acesso ao sistema.</p>
-          <form id="form-troca-senha" onsubmit="salvarNovaSenha(event)">
-            <div class="mb-3">
-              <label class="form-label fw-bold">Nova Senha:</label>
-              <input type="password" id="nova-senha-1" class="form-control" required minlength="6">
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Confirme a Nova Senha:</label>
-              <input type="password" id="nova-senha-2" class="form-control" required minlength="6">
-            </div>
-            <button type="submit" class="btn btn-primary w-100 fw-bold">Salvar e Acessar</button>
-          </form>
+          <p class="small text-muted">Por segurança, você deve alterar a senha padrão antes de acessar o sistema.</p>
+          <div id="alerta-modal" class="alert alert-danger p-2 small d-none"></div>
+          
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Nova Senha</label>
+            <input type="password" id="nova-senha" class="form-control" placeholder="Mínimo de 6 caracteres">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Confirme a Nova Senha</label>
+            <input type="password" id="confirma-senha" class="form-control" placeholder="Repita a nova senha">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success w-100" onclick="confirmarTrocaSenha()">Salvar Nova Senha e Entrar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- JS DO BOOTSTRAP E BIBLIOTECAS -->
+  <!-- ================= TELA PRINCIPAL (DASHBOARD) ================= -->
+  <div id="dashboard-view">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <div>
+        <h3 class="fw-bold mb-0">Painel Principal</h3>
+        <p class="text-muted mb-0">Bem-vindo, <span id="user-nome" class="fw-bold text-primary"></span></p>
+      </div>
+      <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+        <i class="fa-solid fa-power-off me-1"></i>Sair
+      </button>
+    </div>
+    <div class="alert alert-info">
+      <i class="fa-solid fa-circle-info me-2"></i>Login efetuado com sucesso no Sistema de Gestão de Efetivo e Prontidão!
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- LÓGICA EM JAVASCRIPT COMENTADA EM PORTUGUÊS -->
   <script>
-    // URL DO SEU GOOGLE APPS SCRIPT
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuU-eYnizW1AupjdzvyKYI-mf4RdJWyqFm2nEzlyk/exec";
+    // ⚠️ ATENÇÃO: COLE A URL DA SUA NOVA IMPLANTAÇÃO ENTRE AS ASPAS ABAIXO!
+    const SCRIPT_URL = "SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI";
 
-    // VARIÁVEIS GLOBAIS DE DADOS
-    let todosMilitares = [];
     let usuarioLogado = null;
 
-    // =======================================================
-    // 1. FUNÇÃO DE LOGIN VIA REQUISIÇÃO JSONP (RESOLVE CELULAR)
-    // =======================================================
+    // 1. EFETUAR LOGIN VIA WEB APP
     function efetuarLogin(event) {
       event.preventDefault();
-      
-      const cpf = document.getElementById("login-cpf").value.trim();
+
+      const cpf = document.getElementById("login-cpf").value.replace(/\D/g, "");
       const senha = document.getElementById("login-senha").value.trim();
       const btn = document.getElementById("btn-entrar");
       const alerta = document.getElementById("alerta-login");
 
       alerta.classList.add("d-none");
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Autenticando...`;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Conectando...`;
 
-      // Requisição para o Apps Script
-      fetch(`${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`)
-        .then(res => res.json())
-        .then(res => {
-          btn.disabled = false;
-          btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
+      // Chamada GET para evitar bloqueio de CORS com redirecionamento do Google
+      const urlFinal = `${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`;
 
-          if (res.erro) {
-            alerta.innerText = res.mensagem;
-            alerta.classList.remove("d-none");
-            return;
-          }
+      fetch(urlFinal, {
+        method: "GET",
+        redirect: "follow"
+      })
+      .then(response => response.json())
+      .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
 
-          usuarioLogado = res;
-
-          // Verifica se é o primeiro acesso para solicitar nova senha
-          if (res.primeiroAcesso) {
-            const modalSenha = new bootstrap.Modal(document.getElementById('modalTrocaSenha'));
-            modalSenha.show();
-          } else {
-            liberarAcessoDashboard();
-          }
-        })
-        .catch(err => {
-          btn.disabled = false;
-          btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
-          alerta.innerText = "Erro ao conectar com o servidor. Verifique sua internet.";
+        if (res.erro) {
+          alerta.innerText = res.mensagem;
           alerta.classList.remove("d-none");
-        });
+          return;
+        }
+
+        usuarioLogado = res;
+
+        if (res.primeiroAcesso) {
+          const modalSenha = new bootstrap.Modal(document.getElementById('modalTrocaSenha'));
+          modalSenha.show();
+        } else {
+          liberarAcessoDashboard();
+        }
+      })
+      .catch(error => {
+        console.error("Erro na requisição:", error);
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
+        alerta.innerText = "Erro de conexão com a planilha. Verifique se publicou o Apps Script como 'Qualquer pessoa'.";
+        alerta.classList.remove("d-none");
+      });
     }
 
-    // =======================================================
-    // 2. ALTERAÇÃO DE SENHA NO PRIMEIRO ACESSO
-    // =======================================================
-    function salvarNovaSenha(event) {
-      event.preventDefault();
-      const s1 = document.getElementById("nova-senha-1").value;
-      const s2 = document.getElementById("nova-senha-2").value;
+    // 2. TROCA DE SENHA NO PRIMEIRO ACESSO
+    function confirmarTrocaSenha() {
+      const novaSenha = document.getElementById("nova-senha").value.trim();
+      const confirmaSenha = document.getElementById("confirma-senha").value.trim();
+      const alertaModal = document.getElementById("alerta-modal");
 
-      if (s1 !== s2) {
-        alert("As senhas não conferem!");
+      alertaModal.classList.add("d-none");
+
+      if (!novaSenha || novaSenha.length < 6) {
+        alertaModal.innerText = "A senha deve ter pelo menos 6 caracteres.";
+        alertaModal.classList.remove("d-none");
         return;
       }
 
-      const senhaAtual = document.getElementById("login-senha").value;
+      if (novaSenha !== confirmaSenha) {
+        alertaModal.innerText = "As senhas não coincidem!";
+        alertaModal.classList.remove("d-none");
+        return;
+      }
 
-      fetch(`${SCRIPT_URL}?acao=alterarSenha&cpf=${usuarioLogado.cpf}&senhaAtual=${encodeURIComponent(senhaAtual)}&novaSenha=${encodeURIComponent(s1)}`)
+      const urlFinal = `${SCRIPT_URL}?acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}`;
+
+      fetch(urlFinal, { method: "GET", redirect: "follow" })
         .then(res => res.json())
         .then(res => {
           if (res.sucesso) {
-            alert("Senha alterada com sucesso!");
-            bootstrap.Modal.getInstance(document.getElementById('modalTrocaSenha')).hide();
+            const modalEl = document.getElementById('modalTrocaSenha');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            modalInstance.hide();
             liberarAcessoDashboard();
           } else {
-            alert(res.mensagem);
+            alertaModal.innerText = res.mensagem;
+            alertaModal.classList.remove("d-none");
           }
         });
     }
 
-    // LIBERA A TELA PRINCIPAL
+    // 3. EXIBIR TELA PRINCIPAL
     function liberarAcessoDashboard() {
-      document.getElementById("tela-login").classList.add("d-none");
-      document.getElementById("conteudo-dashboard").classList.remove("d-none");
-      document.getElementById("usuario-saudacao").innerText = `Olá, ${usuarioLogado.nome}`;
-      carregarDadosServidor();
+      document.getElementById("login-view").style.display = "none";
+      document.getElementById("dashboard-view").style.display = "block";
+      document.getElementById("user-nome").innerText = usuarioLogado.nome;
     }
 
-    function fazerLogout() {
-      window.location.reload();
-    }
-
-    // =======================================================
-    // 3. CARREGAMENTO DOS DADOS DOS MILITARES DA PLANILHA
-    // =======================================================
-    function carregarDadosServidor() {
-      const tabela = document.getElementById("tabela-corpo");
-      tabela.innerHTML = `<tr><td colspan="8" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Sincronizando efetivo...</td></tr>`;
-
-      fetch(SCRIPT_URL)
-        .then(res => res.json())
-        .then(res => {
-          if (res.sucesso) {
-            todosMilitares = res.militares;
-            ordenarPorAntiguidade(todosMilitares);
-            aplicarFiltros();
-          } else {
-            tabela.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Erro ao carregar dados.</td></tr>`;
-          }
-        })
-        .catch(err => {
-          tabela.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Erro de conexão com a planilha.</td></tr>`;
-        });
-    }
-
-    // =======================================================
-    // 4. ORDENAÇÃO POR ANTIGUIDADE (POSTO -> INCLUSÃO -> NOTA)
-    // =======================================================
-    function ordenarPorAntiguidade(lista) {
-      const hierarquia = {
-        "CEL PM": 1, "TEN CEL PM": 2, "MAJ PM": 3, "CAP PM": 4,
-        "1º TEN PM": 5, "2º TEN PM": 6, "SUBTEN PM": 7,
-        "1º SGT PM": 8, "2º SGT PM": 9, "3º SGT PM": 10,
-        "CB PM": 11, "SD PM": 12
-      };
-
-      lista.sort((a, b) => {
-        // Prioridade 1: Posto/Graduação
-        let pA = hierarquia[a.POST_GRAD?.toUpperCase()] || 99;
-        let pB = hierarquia[b.POST_GRAD?.toUpperCase()] || 99;
-        if (pA !== pB) return pA - pB;
-
-        // Prioridade 2: Data de Inclusão (quem entrou antes é mais antigo)
-        let dataA = a.INCLUSAO || "9999-99-99";
-        let dataB = b.INCLUSAO || "9999-99-99";
-        if (dataA !== dataB) return dataA.localeCompare(dataB);
-
-        // Prioridade 3 (Desempate): Maior Nota
-        let notaA = parseFloat(a.NOTA) || 0;
-        let notaB = parseFloat(b.NOTA) || 0;
-        return notaB - notaA;
-      });
-    }
-
-    // =======================================================
-    // 5. FILTRAGEM POR UNIDADE E PESQUISA COM ATUALIZAÇÃO DOS KPIS
-    // =======================================================
-    function aplicarFiltros() {
-      const unidadeSelecionada = document.getElementById("seletor-unidade").value;
-      const textoBusca = document.getElementById("campo-busca").value.toLowerCase();
-
-      let filtrados = todosMilitares.filter(m => {
-        // Filtro por Unidade
-        const atendeUnidade = (unidadeSelecionada === "TODAS") || (m.UNIDADE === unidadeSelecionada);
-        
-        // Filtro por Texto de Busca
-        const atendeBusca = !textoBusca || 
-          (m.NOME_COMPLETO && m.NOME_COMPLETO.toLowerCase().includes(textoBusca)) ||
-          (m.NOME_GUERRA && m.NOME_GUERRA.toLowerCase().includes(textoBusca)) ||
-          (m.MATRICULA && m.MATRICULA.includes(textoBusca)) ||
-          (m.POST_GRAD && m.POST_GRAD.toLowerCase().includes(textoBusca));
-
-        return atendeUnidade && atendeBusca;
-      });
-
-      // Cálculo dos Indicadores (KPIs)
-      let countTotal = 0, countPronto = 0, countAfastados = 0, countInativos = 0;
-
-      filtrados.forEach(m => {
-        const st = (m.STATUS || "").toUpperCase();
-        if (st.includes("RESERVA") || st.includes("TRANSFERIDO")) {
-          countInativos++;
-        } else {
-          countTotal++;
-          if (st.includes("PRONTO")) countPronto++;
-          else countAfastados++;
-        }
-      });
-
-      // Atualiza os Cartões no Topo
-      document.getElementById("kpi-total").innerText = countTotal;
-      document.getElementById("kpi-pronto").innerText = countPronto;
-      document.getElementById("kpi-afastados").innerText = countAfastados;
-      document.getElementById("kpi-inativos").innerText = countInativos;
-
-      renderizarTabela(filtrados);
-    }
-
-    // =======================================================
-    // 6. RENDERIZAÇÃO DA TABELA DE MILITARES
-    // =======================================================
-    function renderizarTabela(lista) {
-      const tabela = document.getElementById("tabela-corpo");
-      if (lista.length === 0) {
-        tabela.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">Nenhum militar encontrado para esses filtros.</td></tr>`;
-        return;
-      }
-
-      let html = "";
-      lista.forEach((m, idx) => {
-        const statusClass = obterClasseStatus(m.STATUS);
-        const dataRetorno = calcularRetorno(m.INICIO_AFASTAMENTO, m.DIAS_AFASTAMENTO, m.RETORNO);
-
-        html += `
-          <tr>
-            <td><strong>${m.MATRICULA || '-'}</strong></td>
-            <td><span class="badge bg-dark">${m.POST_GRAD || '-'}</span></td>
-            <td>
-              <a href="#" class="text-decoration-none fw-bold text-primary" onclick="abrirFichaMilitar(${idx})">
-                ${m.NOME_COMPLETO || '-'}
-              </a>
-            </td>
-            <td><span class="fw-bold text-uppercase text-secondary">${m.NOME_GUERRA || '-'}</span></td>
-            <td><small>${m.UNIDADE || '-'}</small></td>
-            <td><span class="badge badge-status ${statusClass}">${m.STATUS || 'PRONTO'}</span></td>
-            <td><small>${dataRetorno}</small></td>
-            <td class="text-center">
-              <button class="btn btn-sm btn-outline-primary" onclick="abrirFichaMilitar(${idx})">
-                <i class="fa-solid fa-id-card me-1"></i>Ficha
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tabela.innerHTML = html;
-      // Salva referência local para acesso ao clicar na Ficha
-      window.listaExibida = lista;
-    }
-
-    // =======================================================
-    // 7. CÁLCULO DE DATA DE TÉRMINO/RETORNO AUTOMÁTICO
-    // =======================================================
-    function calcularRetorno(inicio, dias, retornoInformado) {
-      if (retornoInformado) return retornoInformado;
-      if (!inicio || !dias || isNaN(dias)) return "-";
-
-      let d = new Date(inicio);
-      d.setDate(d.getDate() + parseInt(dias));
-      return d.toLocaleDateString('pt-BR');
-    }
-
-    function obterClasseStatus(status) {
-      const st = (status || "").toUpperCase();
-      if (st.includes("PRONTO")) return "status-pronto";
-      if (st.includes("FERIAS") || st.includes("FÉRIAS")) return "status-ferias";
-      if (st.includes("LTS")) return "status-lts";
-      if (st.includes("LICENÇA") || st.includes("LISP")) return "status-licenca";
-      if (st.includes("CURSO")) return "status-curso";
-      return "status-inativo";
-    }
-
-    // =======================================================
-    // 8. EXIBIÇÃO DA FICHA FUNCIONAL DO MILITAR (CARTÃO 3X4)
-    // =======================================================
-    function abrirFichaMilitar(index) {
-      const m = window.listaExibida[index];
-      if (!m) return;
-
-      // Foto 3x4 ou Avatar padrão caso não possua foto
-      const fotoUrl = m.FOTO_URL && m.FOTO_URL.startsWith("http") 
-        ? m.FOTO_URL 
-        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-
-      document.getElementById("ficha-foto").src = fotoUrl;
-      document.getElementById("ficha-posto-guerra").innerText = `${m.POST_GRAD || ''} ${m.NOME_GUERRA || ''}`;
-      document.getElementById("ficha-nome-completo").innerText = m.NOME_COMPLETO || '';
-      
-      document.getElementById("ficha-matricula").innerText = m.MATRICULA || '-';
-      document.getElementById("ficha-cpf").innerText = m.CPF || '-';
-      document.getElementById("ficha-rg").innerText = m.RG || '-';
-      document.getElementById("ficha-re").innerText = m.RE || '-';
-      document.getElementById("ficha-inclusao").innerText = m.INCLUSAO || '-';
-      document.getElementById("ficha-nota").innerText = m.NOTA || '-';
-      document.getElementById("ficha-unidade").innerText = m.UNIDADE || '-';
-
-      const statusClass = obterClasseStatus(m.STATUS);
-      document.getElementById("ficha-status").innerHTML = `<span class="badge badge-status ${statusClass}">${m.STATUS || 'PRONTO'}</span>`;
-      document.getElementById("ficha-retorno").innerText = calcularRetorno(m.INICIO_AFASTAMENTO, m.DIAS_AFASTAMENTO, m.RETORNO);
-      document.getElementById("ficha-obs").innerText = m.OBSERVACAO || "Nenhuma observação registrada.";
-
-      const modal = new bootstrap.Modal(document.getElementById('modalFichaMilitar'));
-      modal.show();
+    // 4. LOGOUT
+    function logout() {
+      usuarioLogado = null;
+      document.getElementById("login-cpf").value = "";
+      document.getElementById("login-senha").value = "";
+      document.getElementById("dashboard-view").style.display = "none";
+      document.getElementById("login-view").style.display = "block";
     }
   </script>
 </body>
