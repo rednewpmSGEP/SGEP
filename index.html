@@ -240,7 +240,7 @@
       </div>
     </div>
 
-    <!-- ABAS -->
+    <!-- ABAS DO SISTEMA -->
     <ul class="nav nav-tabs mb-3 no-print" id="tabMenu" role="tablist">
       <li class="nav-item">
         <button class="nav-link active fw-bold" id="tab-efetivo" data-bs-toggle="tab" data-bs-target="#content-efetivo" type="button">
@@ -361,8 +361,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // URL ATUALIZADA DA IMPLANTAÇÃO
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLJ6vKcSOjSLrog1YWQe2OPoeZdohQa2sDlAVNnHjTnKmMx08ZcAJmh2jRnEfcVs-m/exec";
+    // URL DE IMPLANTAÇÃO ATUALIZADA
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBgMnEefgHXnQ4akwveI8qtGXKElIvzCZVdFxpb8X8tHmMGB_YNwU3nZBtGvEXI8mM/exec";
 
     let usuarioLogado = null;
     let listaMilitares = [];
@@ -471,11 +471,8 @@
     }
 
     function liberarAcessoDashboard() {
-      const loginView = document.getElementById("login-view");
-      const dashView = document.getElementById("dashboard-view");
-      
-      if (loginView) loginView.style.setProperty("display", "none", "important");
-      if (dashView) dashView.style.setProperty("display", "block", "important");
+      document.getElementById("login-view").style.display = "none";
+      document.getElementById("dashboard-view").style.display = "block";
       
       if (usuarioLogado) {
         document.getElementById("user-nome").innerText = usuarioLogado.nome || "Policial";
@@ -488,9 +485,9 @@
     function getProp(obj, chaves) {
       if (!obj) return "";
       for (let i = 0; i < chaves.length; i++) {
-        let kProcurada = chaves[i].toUpperCase();
+        let kProcurada = String(chaves[i]).toUpperCase();
         for (let key in obj) {
-          if (key.toUpperCase() === kProcurada && obj[key] !== undefined && obj[key] !== null) {
+          if (String(key).toUpperCase() === kProcurada && obj[key] !== undefined && obj[key] !== null) {
             return String(obj[key]).trim();
           }
         }
@@ -558,7 +555,7 @@
     }
 
     function filtrarEfetivo() {
-      const busca = document.getElementById("filtro-busca").value.toLowerCase();
+      const busca = (document.getElementById("filtro-busca").value || "").toLowerCase();
       const statusFiltro = document.getElementById("filtro-status").value;
       const unidadeSel = document.getElementById("select-unidade-dash").value;
 
@@ -784,7 +781,7 @@
       document.getElementById("login-cpf").value = "";
       document.getElementById("login-senha").value = "";
       document.getElementById("dashboard-view").style.display = "none";
-      document.getElementById("login-view").style.setProperty("display", "flex", "important");
+      document.getElementById("login-view").style.display = "flex";
     }
   </script>
 </body>
