@@ -1,517 +1,608 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão de Efetivo - 5º CR</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyuU-eYnizW1AupjdzvyKYI-mf4RdJWyqFm2nEzlyk/exec";
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGEP - 5º Comando Regional PMMT</title>
+  
+  <!-- Estilos Bootstrap 5 e Ícones FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* ESTILOS GERAIS DA INTERFACE */
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .navbar-custom {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
 
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        tactical: {
-                            50: '#f4f6f8',
-                            100: '#e5e9f0',
-                            800: '#1e293b',
-                            900: '#0f172a',
-                            gold: '#d97706',
-                            military: '#1b382b'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white !important; color: black !important; }
-            .print-table { width: 100%; border-collapse: collapse; }
-            .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 6px 10px; text-align: left; font-size: 11px; }
-        }
-        .print-only { display: none; }
-    </style>
+    .card-kpi {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .card-kpi:hover {
+      transform: translateY(-3px);
+    }
+
+    /* ESTILO DA TELA DE LOGIN */
+    #tela-login {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #0b1325, #1c2a48);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .box-login {
+      background: #ffffff;
+      padding: 2.5rem;
+      border-radius: 16px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    /* ESTILO DO CARTÃO / FICHA 3X4 DO POLICIAL */
+    .foto-militar-3x4 {
+      width: 130px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 3px solid #1c2a48;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .militar-card-header {
+      background-color: #1c2a48;
+      color: white;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    /* TAGS DE STATUS COLORIDAS */
+    .badge-status {
+      font-size: 0.85rem;
+      padding: 0.4em 0.8em;
+      border-radius: 20px;
+    }
+    .status-pronto { background-color: #198754; color: white; }
+    .status-ferias { background-color: #ffc107; color: #000; }
+    .status-lts { background-color: #dc3545; color: white; }
+    .status-licenca { background-color: #fd7e14; color: white; }
+    .status-curso { background-color: #0dcaf0; color: #000; }
+    .status-inativo { background-color: #6c757d; color: white; }
+  </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-200">
+<body>
 
-    <header class="no-print bg-slate-900 text-white border-b border-slate-700 sticky top-0 z-30 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="bg-amber-600 text-slate-900 p-2 rounded-lg font-bold flex items-center justify-center w-10 h-10 shadow">
-                    <i class="fa-solid font-bold fa-shield-halved text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight tracking-wide">5º CR - POLÍCIA MILITAR</h1>
-                    <p class="text-xs text-slate-400">Sistema de Gestão de Efetivo e Prontidão</p>
-                </div>
-            </div>
+  <!-- ========================================== -->
+  <!-- TELA DE LOGIN / AUTENTICAÇÃO POR CPF       -->
+  <!-- ========================================== -->
+  <div id="tela-login">
+    <div class="box-login text-center">
+      <div class="mb-3">
+        <i class="fa-solid fa-shield-halved fa-3x text-primary"></i>
+      </div>
+      <h4 class="fw-bold mb-1">5º COMANDO REGIONAL</h4>
+      <p class="text-muted small mb-4">Sistema de Gestão de Efetivo e Prontidão</p>
+      
+      <div id="alerta-login" class="alert alert-danger d-none" role="alert"></div>
 
-            <div class="flex items-center space-x-3">
-                <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="Alternar Tema">
-                    <i id="theme-icon" class="fa-solid fa-sun text-amber-400"></i>
-                </button>
-                <button onclick="carregarDadosPlanilha()" class="px-3 py-2 bg-blue-700 hover:bg-blue-600 text-white text-sm font-medium rounded-lg flex items-center gap-2 transition shadow-sm" title="Atualizar Dados">
-                    <i class="fa-solid fa-rotate"></i>
-                    <span class="hidden sm:inline">Sincronizar Planilha</span>
-                </button>
-                <button onclick="window.print()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-lg flex items-center gap-2 transition border border-slate-700 shadow-sm">
-                    <i class="fa-solid fa-print"></i>
-                    <span class="hidden sm:inline">Imprimir Relatório</span>
-                </button>
-                <button onclick="openModal()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-900 font-bold text-sm rounded-lg flex items-center gap-2 transition shadow">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>Cadastrar Policial</span>
-                </button>
-            </div>
+      <form id="form-login" onsubmit="efetuarLogin(event)">
+        <div class="form-floating mb-3 text-start">
+          <input type="text" class="form-control" id="login-cpf" placeholder="CPF" required>
+          <label for="login-cpf"><i class="fa-solid fa-id-card me-2"></i>CPF (Apenas Números)</label>
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <section class="no-print grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Efetivo Total</p>
-                    <h3 id="kpi-total" class="text-3xl font-bold mt-1 text-slate-900 dark:text-white">0</h3>
-                </div>
-                <div class="p-3 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg">
-                    <i class="fa-solid fa-users text-2xl"></i>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pronto na Sede</p>
-                    <h3 id="kpi-pronto" class="text-3xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">0</h3>
-                </div>
-                <div class="p-3 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
-                    <i class="fa-solid fa-user-check text-2xl"></i>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Férias / Licença</p>
-                    <h3 id="kpi-ferias" class="text-3xl font-bold mt-1 text-amber-600 dark:text-amber-400">0</h3>
-                </div>
-                <div class="p-3 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-lg">
-                    <i class="fa-solid fa-umbrella-beach text-2xl"></i>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Afastados / LTS</p>
-                    <h3 id="kpi-afastado" class="text-3xl font-bold mt-1 text-rose-600 dark:text-rose-400">0</h3>
-                </div>
-                <div class="p-3 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 rounded-lg">
-                    <i class="fa-solid fa-user-xmark text-2xl"></i>
-                </div>
-            </div>
-        </section>
-
-        <section class="no-print bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm space-y-4">
-            <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div class="relative w-full md:w-96">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Buscar por Nome, RE, RG ou Graduação..." class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <select id="unit-filter" onchange="renderTable()" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-sm rounded-lg p-2 focus:ring-2 focus:ring-amber-500">
-                        <option value="ALL">Todas as Unidades</option>
-                        <option value="5º CR - Sede">5º CR - Sede</option>
-                        <option value="2º BPM">2º BPM</option>
-                        <option value="13º BPM">13º BPM</option>
-                        <option value="CPA">CPA</option>
-                    </select>
-
-                    <button onclick="filterStatus('ALL')" class="status-tab active-tab px-3 py-1.5 text-xs font-semibold rounded-lg border transition border-slate-300 dark:border-slate-600 bg-slate-200 dark:bg-slate-700" data-status="ALL">Todos</button>
-                    <button onclick="filterStatus('PRONTO')" class="status-tab px-3 py-1.5 text-xs font-semibold rounded-lg border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400" data-status="PRONTO">Prontos</button>
-                    <button onclick="filterStatus('FERIAS')" class="status-tab px-3 py-1.5 text-xs font-semibold rounded-lg border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400" data-status="FERIAS">Férias</button>
-                    <button onclick="filterStatus('AFASTADO')" class="status-tab px-3 py-1.5 text-xs font-semibold rounded-lg border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400" data-status="AFASTADO">Afastados</button>
-                </div>
-            </div>
-        </section>
-
-        <section class="no-print bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700/60 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 uppercase text-xs font-semibold border-b border-slate-200 dark:border-slate-700">
-                        <tr>
-                            <th class="px-4 py-3">Graduação / Nome</th>
-                            <th class="px-4 py-3">RE / RG</th>
-                            <th class="px-4 py-3">Unidade</th>
-                            <th class="px-4 py-3">Status Atual</th>
-                            <th class="px-4 py-3">Observação / Prazo</th>
-                            <th class="px-4 py-3 text-right">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="personnel-table-body" class="divide-y divide-slate-200 dark:divide-slate-700">
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="print-only">
-            <div class="text-center mb-6">
-                <h2 class="text-xl font-bold uppercase">Polícia Militar do Estado de Mato Grosso</h2>
-                <h3 class="text-lg font-semibold uppercase">5º Comando Regional - 5º CR</h3>
-                <p class="text-sm text-slate-600">Relatório Geral de Gestão e Situação de Efetivo</p>
-                <p class="text-xs text-slate-500 mt-1" id="print-date"></p>
-            </div>
-
-            <table class="print-table">
-                <thead>
-                    <tr>
-                        <th>Posto/Grad</th>
-                        <th>Nome Completo</th>
-                        <th>RE</th>
-                        <th>RG</th>
-                        <th>Unidade</th>
-                        <th>Status</th>
-                        <th>Observação/Retorno</th>
-                    </tr>
-                </thead>
-                <tbody id="print-table-body">
-                </tbody>
-            </table>
-        </section>
-    </main>
-
-    <div id="modal-form" class="no-print fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 dark:border-slate-700">
-            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center border-b border-slate-700">
-                <h3 id="modal-title" class="font-bold text-base">Cadastrar Policial Militar</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            
-            <form id="personnel-form" onsubmit="savePersonnel(event)" class="p-6 space-y-4">
-                <input type="hidden" id="edit-id">
-                <input type="hidden" id="edit-row-index">
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">Posto / Graduação</label>
-                        <input type="text" id="form-grad" required placeholder="Ex: 1º Sgt PM, Ten Cel PM" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">Unidade</label>
-                        <input type="text" id="form-unit" required placeholder="Ex: 5º CR - Sede, 2º BPM" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">Nome Completo</label>
-                    <input type="text" id="form-name" required placeholder="Ex: João da Silva" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">RE / Matrícula</label>
-                        <input type="text" id="form-re" required placeholder="123.456" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">RG Militar</label>
-                        <input type="text" id="form-rg" placeholder="882.986" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">Status Inicial</label>
-                        <select id="form-status" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                            <option value="PRONTO">PRONTO NA SEDE</option>
-                            <option value="FERIAS">FÉRIAS REGULAMENTARES</option>
-                            <option value="AFASTADO">AFASTADO / LTS / LICENÇA</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">Previsão de Retorno</label>
-                        <input type="date" id="form-return" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-300">Observações / Motivo</label>
-                    <textarea id="form-notes" rows="2" placeholder="Informações adicionais..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500"></textarea>
-                </div>
-
-                <div class="flex justify-end space-x-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700">Cancelar</button>
-                    <button type="submit" id="btn-save" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-900 font-bold rounded-lg text-sm shadow flex items-center gap-2">
-                        <span>Salvar Dados</span>
-                    </button>
-                </div>
-            </form>
+        <div class="form-floating mb-3 text-start">
+          <input type="password" class="form-control" id="login-senha" placeholder="Senha" required>
+          <label for="login-senha"><i class="fa-solid fa-lock me-2"></i>Senha</label>
         </div>
+        <button type="submit" id="btn-entrar" class="btn btn-primary w-100 py-2 fw-bold">
+          <i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA
+        </button>
+      </form>
     </div>
+  </div>
 
-    <script>
-        let personnelList = [];
-        let currentStatusFilter = 'ALL';
+  <!-- ========================================== -->
+  <!-- CONTEÚDO PRINCIPAL DO DASHBOARD             -->
+  <!-- ========================================== -->
+  <div id="conteudo-dashboard" class="d-none">
+    
+    <!-- BARRA SUPERIOR (NAVBAR) -->
+    <nav class="navbar navbar-expand-lg navbar-custom px-4 py-3">
+      <div class="container-fluid">
+        <a class="navbar-brand text-white fw-bold d-flex align-items-center" href="#">
+          <i class="fa-solid fa-shield-halved me-2"></i>
+          5º COMANDO REGIONAL - PMMT
+        </a>
+        <div class="d-flex align-items-center text-white gap-3">
+          <span id="usuario-saudacao" class="small"></span>
+          <button class="btn btn-outline-light btn-sm" onclick="fazerLogout()">
+            <i class="fa-solid fa-power-off me-1"></i>Sair
+          </button>
+        </div>
+      </div>
+    </nav>
 
-        async function carregarDadosPlanilha() {
-            if (!API_URL) return;
+    <div class="container-fluid px-4 py-4">
+      
+      <!-- CONTROLES SUPERIORES: FILTRO DE UNIDADES E BUSCA -->
+      <div class="row mb-4 align-items-center">
+        <div class="col-md-5 mb-2 mb-md-0">
+          <label class="form-label fw-bold text-secondary mb-1"><i class="fa-solid fa-building-shield me-1"></i>Selecionar Unidade:</label>
+          <select id="seletor-unidade" class="form-select form-select-lg shadow-sm" onchange="aplicarFiltros()">
+            <option value="TODAS">TODAS AS UNIDADES (5º CR - VISÃO GERAL)</option>
+            <option value="5º COMANDO REGIONAL (5º CR)">5º COMANDO REGIONAL (5º CR)</option>
+            <option value="2º BATALHÃO DE POLÍCIA MILITAR (2º BPM)">2º BATALHÃO DE POLÍCIA MILITAR (2º BPM)</option>
+            <option value="PEL PM DE NOVO SÃO JOAQUIM">PEL PM DE NOVO SÃO JOAQUIM</option>
+            <option value="NPM DE PAREDÃO DO LESTE">NPM DE PAREDÃO DO LESTE</option>
+            <option value="NPM DE GAL CARNEIRO">NPM DE GAL CARNEIRO</option>
+            <option value="NPM DE ITAQUERÊ">NPM DE ITAQUERÊ</option>
+            <option value="NPM DE INDIANÓPOLIS">NPM DE INDIANÓPOLIS</option>
+            <option value="NPM DE ARAGUAIANA">NPM DE ARAGUAIANA</option>
+            <option value="NPM DE TORIXOREU">NPM DE TORIXOREU</option>
+            <option value="NPM DE RIBEIRÃOZINHO">NPM DE RIBEIRÃOZINHO</option>
+            <option value="NPM DE PONTAL DO ARAGUAIA">NPM DE PONTAL DO ARAGUAIA</option>
+          </select>
+        </div>
 
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                let rawList = Array.isArray(data) ? data : (data.militares || []);
-                
-                if (rawList && rawList.length > 0) {
-                    personnelList = rawList.map((item, idx) => ({
-                        id: String(idx + 1),
-                        _rowIndex: item._rowIndex || null,
-                        grad: item.POST_GRAD || item.POSTO_GRAD || item.grad || 'Sd PM',
-                        name: item.NOME_COMPLETO || item.NOME || item.name || '',
-                        re: String(item.RE || item.re || ''),
-                        rg: String(item.RG || item.rg || ''),
-                        unit: item.UNIDADE || item.unit || '5º CR - Sede',
-                        status: String(item.STATUS || item.status || 'PRONTO').toUpperCase(),
-                        returnDate: item.RETORNO || item.returnDate || '',
-                        notes: item.OBSERVACAO || item.notes || ''
-                    }));
-                    saveDataLocal();
-                }
-            } catch (err) {
-                console.error("Erro ao carregar planilha:", err);
-            }
-        }
+        <div class="col-md-4 mb-2 mb-md-0">
+          <label class="form-label fw-bold text-secondary mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i>Pesquisar Militar:</label>
+          <input type="text" id="campo-busca" class="form-control form-control-lg shadow-sm" placeholder="Nome, Matrícula, CPF ou Posto..." onkeyup="aplicarFiltros()">
+        </div>
 
-        function saveDataLocal() {
-            localStorage.setItem('pm_efetivo_data', JSON.stringify(personnelList));
-            updateDashboard();
-            renderTable();
-        }
+        <div class="col-md-3 text-md-end mt-md-4">
+          <button class="btn btn-success btn-lg w-100 shadow-sm" onclick="carregarDadosServidor()">
+            <i class="fa-solid fa-rotate me-2"></i>Sincronizar
+          </button>
+        </div>
+      </div>
 
-        function toggleDarkMode() {
-            const html = document.documentElement;
-            const icon = document.getElementById('theme-icon');
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                icon.className = 'fa-solid fa-moon text-slate-700';
-            } else {
-                html.classList.add('dark');
-                icon.className = 'fa-solid fa-sun text-amber-400';
-            }
-        }
+      <!-- CARTOES DE INDICADORES (KPIS) -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="card card-kpi bg-white p-3 border-start border-4 border-primary">
+            <div class="text-muted small fw-bold">EFETIVO ATIVO TOTAL</div>
+            <div id="kpi-total" class="h2 fw-bold text-dark mb-0">0</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card card-kpi bg-white p-3 border-start border-4 border-success">
+            <div class="text-muted small fw-bold">PRONTO NA SEDE</div>
+            <div id="kpi-pronto" class="h2 fw-bold text-success mb-0">0</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card card-kpi bg-white p-3 border-start border-4 border-warning">
+            <div class="text-muted small fw-bold">FÉRIAS / LICENÇAS</div>
+            <div id="kpi-afastados" class="h2 fw-bold text-warning mb-0">0</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card card-kpi bg-white p-3 border-start border-4 border-secondary">
+            <div class="text-muted small fw-bold">RESERVA / TRANSFERIDOS</div>
+            <div id="kpi-inativos" class="h2 fw-bold text-secondary mb-0">0</div>
+          </div>
+        </div>
+      </div>
 
-        function filterStatus(status) {
-            currentStatusFilter = status;
-            document.querySelectorAll('.status-tab').forEach(tab => {
-                if (tab.dataset.status === status) {
-                    tab.classList.add('bg-slate-200', 'dark:bg-slate-700', 'border-slate-300', 'dark:border-slate-600');
-                } else {
-                    tab.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'border-slate-300', 'dark:border-slate-600');
-                }
-            });
-            renderTable();
-        }
+      <!-- TABELA DE MILITARES -->
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>MATRÍCULA</th>
+                  <th>POSTO/GRAD</th>
+                  <th>NOME COMPLETO</th>
+                  <th>NOME DE GUERRA</th>
+                  <th>UNIDADE</th>
+                  <th>SITUAÇÃO / STATUS</th>
+                  <th>PERÍODO / RETORNO</th>
+                  <th class="text-center">AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-corpo">
+                <tr>
+                  <td colspan="8" class="text-center py-4 text-muted">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i>Carregando dados do efetivo...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-        function updateDashboard() {
-            document.getElementById('kpi-total').innerText = personnelList.length;
-            document.getElementById('kpi-pronto').innerText = personnelList.filter(p => p.status === 'PRONTO').length;
-            document.getElementById('kpi-ferias').innerText = personnelList.filter(p => p.status === 'FERIAS' || p.status === 'FÉRIAS').length;
-            document.getElementById('kpi-afastado').innerText = personnelList.filter(p => p.status === 'AFASTADO' || p.status === 'LTS').length;
-        }
+    </div>
+  </div>
 
-        function renderTable() {
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const unit = document.getElementById('unit-filter').value;
-            const tbody = document.getElementById('personnel-table-body');
-            const printBody = document.getElementById('print-table-body');
+  <!-- ========================================== -->
+  <!-- MODAL: FICHA DO POLICIAL (CARTÃO 3X4)       -->
+  <!-- ========================================== -->
+  <div class="modal fade" id="modalFichaMilitar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 rounded-3 shadow">
+        <div class="modal-header militar-card-header px-4 py-3">
+          <h5 class="modal-title fw-bold" id="modal-titulo">FICHA FUNCIONAL DO MILITAR</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row align-items-center mb-4">
+            <!-- FOTO 3X4 E NOME DE GUERRA ABAIXO DA FOTO -->
+            <div class="col-md-4 text-center border-end">
+              <img id="ficha-foto" src="" class="foto-militar-3x4 mb-2" alt="Foto 3x4">
+              <div id="ficha-posto-guerra" class="fw-bold text-primary h5 mb-0"></div>
+              <small class="text-muted">Nome de Identificação</small>
+            </div>
+            <!-- DADOS CADASTRAIS DIVEROS -->
+            <div class="col-md-8">
+              <h4 id="ficha-nome-completo" class="fw-bold mb-3"></h4>
+              <div class="row g-2">
+                <div class="col-6"><strong>Matrícula:</strong> <span id="ficha-matricula"></span></div>
+                <div class="col-6"><strong>CPF:</strong> <span id="ficha-cpf"></span></div>
+                <div class="col-6"><strong>RG Militar:</strong> <span id="ficha-rg"></span></div>
+                <div class="col-6"><strong>RE:</strong> <span id="ficha-re"></span></div>
+                <div class="col-6"><strong>Data Inclusão:</strong> <span id="ficha-inclusao"></span></div>
+                <div class="col-6"><strong>Nota Antiguidade:</strong> <span id="ficha-nota"></span></div>
+                <div class="col-12 mt-2"><strong>Unidade:</strong> <span id="ficha-unidade" class="badge bg-secondary"></span></div>
+              </div>
+            </div>
+          </div>
 
-            tbody.innerHTML = '';
-            printBody.innerHTML = '';
+          <hr>
 
-            const filtered = personnelList.filter(p => {
-                const matchesSearch = p.name.toLowerCase().includes(search) || 
-                                      p.re.toLowerCase().includes(search) || 
-                                      p.rg.toLowerCase().includes(search) || 
-                                      p.grad.toLowerCase().includes(search);
-                const matchesUnit = unit === 'ALL' || p.unit === unit;
-                const matchesStatus = currentStatusFilter === 'ALL' || p.status.includes(currentStatusFilter);
-                return matchesSearch && matchesUnit && matchesStatus;
-            });
+          <!-- SITUAÇÃO E AFASTAMENTO -->
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="fw-bold text-muted small">STATUS ATUAL:</label>
+              <div id="ficha-status"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="fw-bold text-muted small">PREVISÃO DE RETORNO:</label>
+              <div id="ficha-retorno" class="fw-bold text-dark"></div>
+            </div>
+            <div class="col-12 mt-2">
+              <label class="fw-bold text-muted small">OBSERVAÇÕES:</label>
+              <p id="ficha-obs" class="bg-light p-2 rounded text-secondary mb-0"></p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light px-4">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i>Imprimir Ficha</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            filtered.forEach(p => {
-                let badgeClass = '';
-                let statusLabel = '';
-                if (p.status === 'PRONTO') {
-                    badgeClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300';
-                    statusLabel = 'Pronto na Sede';
-                } else if (p.status === 'FERIAS' || p.status === 'FÉRIAS') {
-                    badgeClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300';
-                    statusLabel = 'Férias';
-                } else {
-                    badgeClass = 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300';
-                    statusLabel = 'Afastado / LTS';
-                }
+  <!-- ========================================== -->
+  <!-- MODAL: ALTERAÇÃO DE SENHA (1º ACESSO)       -->
+  <!-- ========================================== -->
+  <div class="modal fade" id="modalTrocaSenha" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-key me-2"></i>Primeiro Acesso - Troca de Senha</h5>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted">Por segurança, é obrigatório cadastrar uma nova senha pessoal no primeiro acesso ao sistema.</p>
+          <form id="form-troca-senha" onsubmit="salvarNovaSenha(event)">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nova Senha:</label>
+              <input type="password" id="nova-senha-1" class="form-control" required minlength="6">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Confirme a Nova Senha:</label>
+              <input type="password" id="nova-senha-2" class="form-control" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary w-100 fw-bold">Salvar e Acessar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-700/30 transition';
-                tr.innerHTML = `
-                    <td class="px-4 py-3">
-                        <div class="font-bold text-slate-900 dark:text-white">${p.grad} ${p.name}</div>
-                    </td>
-                    <td class="px-4 py-3 font-mono text-xs">
-                        <div>RE: ${p.re}</div>
-                        <div class="text-slate-400">RG: ${p.rg}</div>
-                    </td>
-                    <td class="px-4 py-3">${p.unit}</td>
-                    <td class="px-4 py-3">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}">
-                            ${statusLabel}
-                        </span>
-                    </td>
-                    <td class="px-4 py-3 text-xs">
-                        <div>${p.notes || '-'}</div>
-                        ${p.returnDate ? `<div class="text-slate-400 mt-0.5"><i class="fa-regular fa-calendar text-xs mr-1"></i>Retorno: ${p.returnDate}</div>` : ''}
-                    </td>
-                    <td class="px-4 py-3 text-right space-x-2">
-                        <button onclick="editPersonnel('${p.id}')" class="p-1.5 text-slate-500 hover:text-amber-500 transition" title="Editar">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
-                        <button onclick="deletePersonnel('${p.id}')" class="p-1.5 text-slate-500 hover:text-rose-500 transition" title="Excluir">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+  <!-- JS DO BOOTSTRAP E BIBLIOTECAS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-                const printTr = document.createElement('tr');
-                printTr.innerHTML = `
-                    <td>${p.grad}</td>
-                    <td>${p.name}</td>
-                    <td>${p.re}</td>
-                    <td>${p.rg}</td>
-                    <td>${p.unit}</td>
-                    <td>${statusLabel}</td>
-                    <td>${p.notes || ''} ${p.returnDate ? '(Retorno: ' + p.returnDate + ')' : ''}</td>
-                `;
-                printBody.appendChild(printTr);
-            });
+  <!-- LÓGICA EM JAVASCRIPT COMENTADA EM PORTUGUÊS -->
+  <script>
+    // URL DO SEU GOOGLE APPS SCRIPT
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuU-eYnizW1AupjdzvyKYI-mf4RdJWyqFm2nEzlyk/exec";
 
-            document.getElementById('print-date').innerText = 'Emitido em: ' + new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR');
-        }
+    // VARIÁVEIS GLOBAIS DE DADOS
+    let todosMilitares = [];
+    let usuarioLogado = null;
 
-        function openModal(isEdit = false) {
-            document.getElementById('modal-title').innerText = isEdit ? 'Editar Dados do Policial' : 'Cadastrar Policial Militar';
-            document.getElementById('modal-form').classList.remove('hidden');
-        }
+    // =======================================================
+    // 1. FUNÇÃO DE LOGIN VIA REQUISIÇÃO JSONP (RESOLVE CELULAR)
+    // =======================================================
+    function efetuarLogin(event) {
+      event.preventDefault();
+      
+      const cpf = document.getElementById("login-cpf").value.trim();
+      const senha = document.getElementById("login-senha").value.trim();
+      const btn = document.getElementById("btn-entrar");
+      const alerta = document.getElementById("alerta-login");
 
-        function closeModal() {
-            document.getElementById('modal-form').classList.add('hidden');
-            document.getElementById('personnel-form').reset();
-            document.getElementById('edit-id').value = '';
-            document.getElementById('edit-row-index').value = '';
-        }
+      alerta.classList.add("d-none");
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Autenticando...`;
 
-        async function savePersonnel(e) {
-            e.preventDefault();
-            const btnSave = document.getElementById('btn-save');
-            btnSave.disabled = true;
-            btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando na Planilha...';
+      // Requisição para o Apps Script
+      fetch(`${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`)
+        .then(res => res.json())
+        .then(res => {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
 
-            const id = document.getElementById('edit-id').value;
-            const rowIndex = document.getElementById('edit-row-index').value;
+          if (res.erro) {
+            alerta.innerText = res.mensagem;
+            alerta.classList.remove("d-none");
+            return;
+          }
 
-            const payload = {
-                _rowIndex: rowIndex ? parseInt(rowIndex) : null,
-                POST_GRAD: document.getElementById('form-grad').value,
-                UNIDADE: document.getElementById('form-unit').value,
-                NOME_COMPLETO: document.getElementById('form-name').value,
-                RE: document.getElementById('form-re').value,
-                RG: document.getElementById('form-rg').value,
-                STATUS: document.getElementById('form-status').value,
-                RETORNO: document.getElementById('form-return').value,
-                OBSERVACAO: document.getElementById('form-notes').value
-            };
+          usuarioLogado = res;
 
-            // 1. Atualiza localmente imediatamente
-            if (id) {
-                const index = personnelList.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    personnelList[index] = {
-                        ...personnelList[index],
-                        grad: payload.POST_GRAD,
-                        unit: payload.UNIDADE,
-                        name: payload.NOME_COMPLETO,
-                        re: payload.RE,
-                        rg: payload.RG,
-                        status: payload.STATUS,
-                        returnDate: payload.RETORNO,
-                        notes: payload.OBSERVACAO
-                    };
-                }
-            }
-            saveDataLocal();
-
-            // 2. Envia para a planilha via POST
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } catch (err) {
-                console.error("Erro ao enviar para o Google Sheets:", err);
-            }
-
-            btnSave.disabled = false;
-            btnSave.innerHTML = 'Salvar Dados';
-            closeModal();
-            setTimeout(carregarDadosPlanilha, 1000);
-        }
-
-        function editPersonnel(id) {
-            const p = personnelList.find(item => item.id === id);
-            if (!p) return;
-
-            document.getElementById('edit-id').value = p.id;
-            document.getElementById('edit-row-index').value = p._rowIndex || '';
-            document.getElementById('form-grad').value = p.grad || '';
-            document.getElementById('form-unit').value = p.unit || '';
-            document.getElementById('form-name').value = p.name || '';
-            document.getElementById('form-re').value = p.re || '';
-            document.getElementById('form-rg').value = p.rg || '';
-            document.getElementById('form-status').value = p.status || 'PRONTO';
-            document.getElementById('form-return').value = p.returnDate || '';
-            document.getElementById('form-notes').value = p.notes || '';
-
-            openModal(true);
-        }
-
-        function deletePersonnel(id) {
-            if (confirm('Tem certeza que deseja remover este policial da lista?')) {
-                personnelList = personnelList.filter(p => p.id !== id);
-                saveDataLocal();
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const localData = localStorage.getItem('pm_efetivo_data');
-            if (localData) {
-                personnelList = JSON.parse(localData);
-                updateDashboard();
-                renderTable();
-            }
-            carregarDadosPlanilha();
+          // Verifica se é o primeiro acesso para solicitar nova senha
+          if (res.primeiroAcesso) {
+            const modalSenha = new bootstrap.Modal(document.getElementById('modalTrocaSenha'));
+            modalSenha.show();
+          } else {
+            liberarAcessoDashboard();
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
+          alerta.innerText = "Erro ao conectar com o servidor. Verifique sua internet.";
+          alerta.classList.remove("d-none");
         });
-    </script>
+    }
+
+    // =======================================================
+    // 2. ALTERAÇÃO DE SENHA NO PRIMEIRO ACESSO
+    // =======================================================
+    function salvarNovaSenha(event) {
+      event.preventDefault();
+      const s1 = document.getElementById("nova-senha-1").value;
+      const s2 = document.getElementById("nova-senha-2").value;
+
+      if (s1 !== s2) {
+        alert("As senhas não conferem!");
+        return;
+      }
+
+      const senhaAtual = document.getElementById("login-senha").value;
+
+      fetch(`${SCRIPT_URL}?acao=alterarSenha&cpf=${usuarioLogado.cpf}&senhaAtual=${encodeURIComponent(senhaAtual)}&novaSenha=${encodeURIComponent(s1)}`)
+        .then(res => res.json())
+        .then(res => {
+          if (res.sucesso) {
+            alert("Senha alterada com sucesso!");
+            bootstrap.Modal.getInstance(document.getElementById('modalTrocaSenha')).hide();
+            liberarAcessoDashboard();
+          } else {
+            alert(res.mensagem);
+          }
+        });
+    }
+
+    // LIBERA A TELA PRINCIPAL
+    function liberarAcessoDashboard() {
+      document.getElementById("tela-login").classList.add("d-none");
+      document.getElementById("conteudo-dashboard").classList.remove("d-none");
+      document.getElementById("usuario-saudacao").innerText = `Olá, ${usuarioLogado.nome}`;
+      carregarDadosServidor();
+    }
+
+    function fazerLogout() {
+      window.location.reload();
+    }
+
+    // =======================================================
+    // 3. CARREGAMENTO DOS DADOS DOS MILITARES DA PLANILHA
+    // =======================================================
+    function carregarDadosServidor() {
+      const tabela = document.getElementById("tabela-corpo");
+      tabela.innerHTML = `<tr><td colspan="8" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Sincronizando efetivo...</td></tr>`;
+
+      fetch(SCRIPT_URL)
+        .then(res => res.json())
+        .then(res => {
+          if (res.sucesso) {
+            todosMilitares = res.militares;
+            ordenarPorAntiguidade(todosMilitares);
+            aplicarFiltros();
+          } else {
+            tabela.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Erro ao carregar dados.</td></tr>`;
+          }
+        })
+        .catch(err => {
+          tabela.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Erro de conexão com a planilha.</td></tr>`;
+        });
+    }
+
+    // =======================================================
+    // 4. ORDENAÇÃO POR ANTIGUIDADE (POSTO -> INCLUSÃO -> NOTA)
+    // =======================================================
+    function ordenarPorAntiguidade(lista) {
+      const hierarquia = {
+        "CEL PM": 1, "TEN CEL PM": 2, "MAJ PM": 3, "CAP PM": 4,
+        "1º TEN PM": 5, "2º TEN PM": 6, "SUBTEN PM": 7,
+        "1º SGT PM": 8, "2º SGT PM": 9, "3º SGT PM": 10,
+        "CB PM": 11, "SD PM": 12
+      };
+
+      lista.sort((a, b) => {
+        // Prioridade 1: Posto/Graduação
+        let pA = hierarquia[a.POST_GRAD?.toUpperCase()] || 99;
+        let pB = hierarquia[b.POST_GRAD?.toUpperCase()] || 99;
+        if (pA !== pB) return pA - pB;
+
+        // Prioridade 2: Data de Inclusão (quem entrou antes é mais antigo)
+        let dataA = a.INCLUSAO || "9999-99-99";
+        let dataB = b.INCLUSAO || "9999-99-99";
+        if (dataA !== dataB) return dataA.localeCompare(dataB);
+
+        // Prioridade 3 (Desempate): Maior Nota
+        let notaA = parseFloat(a.NOTA) || 0;
+        let notaB = parseFloat(b.NOTA) || 0;
+        return notaB - notaA;
+      });
+    }
+
+    // =======================================================
+    // 5. FILTRAGEM POR UNIDADE E PESQUISA COM ATUALIZAÇÃO DOS KPIS
+    // =======================================================
+    function aplicarFiltros() {
+      const unidadeSelecionada = document.getElementById("seletor-unidade").value;
+      const textoBusca = document.getElementById("campo-busca").value.toLowerCase();
+
+      let filtrados = todosMilitares.filter(m => {
+        // Filtro por Unidade
+        const atendeUnidade = (unidadeSelecionada === "TODAS") || (m.UNIDADE === unidadeSelecionada);
+        
+        // Filtro por Texto de Busca
+        const atendeBusca = !textoBusca || 
+          (m.NOME_COMPLETO && m.NOME_COMPLETO.toLowerCase().includes(textoBusca)) ||
+          (m.NOME_GUERRA && m.NOME_GUERRA.toLowerCase().includes(textoBusca)) ||
+          (m.MATRICULA && m.MATRICULA.includes(textoBusca)) ||
+          (m.POST_GRAD && m.POST_GRAD.toLowerCase().includes(textoBusca));
+
+        return atendeUnidade && atendeBusca;
+      });
+
+      // Cálculo dos Indicadores (KPIs)
+      let countTotal = 0, countPronto = 0, countAfastados = 0, countInativos = 0;
+
+      filtrados.forEach(m => {
+        const st = (m.STATUS || "").toUpperCase();
+        if (st.includes("RESERVA") || st.includes("TRANSFERIDO")) {
+          countInativos++;
+        } else {
+          countTotal++;
+          if (st.includes("PRONTO")) countPronto++;
+          else countAfastados++;
+        }
+      });
+
+      // Atualiza os Cartões no Topo
+      document.getElementById("kpi-total").innerText = countTotal;
+      document.getElementById("kpi-pronto").innerText = countPronto;
+      document.getElementById("kpi-afastados").innerText = countAfastados;
+      document.getElementById("kpi-inativos").innerText = countInativos;
+
+      renderizarTabela(filtrados);
+    }
+
+    // =======================================================
+    // 6. RENDERIZAÇÃO DA TABELA DE MILITARES
+    // =======================================================
+    function renderizarTabela(lista) {
+      const tabela = document.getElementById("tabela-corpo");
+      if (lista.length === 0) {
+        tabela.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">Nenhum militar encontrado para esses filtros.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      lista.forEach((m, idx) => {
+        const statusClass = obterClasseStatus(m.STATUS);
+        const dataRetorno = calcularRetorno(m.INICIO_AFASTAMENTO, m.DIAS_AFASTAMENTO, m.RETORNO);
+
+        html += `
+          <tr>
+            <td><strong>${m.MATRICULA || '-'}</strong></td>
+            <td><span class="badge bg-dark">${m.POST_GRAD || '-'}</span></td>
+            <td>
+              <a href="#" class="text-decoration-none fw-bold text-primary" onclick="abrirFichaMilitar(${idx})">
+                ${m.NOME_COMPLETO || '-'}
+              </a>
+            </td>
+            <td><span class="fw-bold text-uppercase text-secondary">${m.NOME_GUERRA || '-'}</span></td>
+            <td><small>${m.UNIDADE || '-'}</small></td>
+            <td><span class="badge badge-status ${statusClass}">${m.STATUS || 'PRONTO'}</span></td>
+            <td><small>${dataRetorno}</small></td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary" onclick="abrirFichaMilitar(${idx})">
+                <i class="fa-solid fa-id-card me-1"></i>Ficha
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tabela.innerHTML = html;
+      // Salva referência local para acesso ao clicar na Ficha
+      window.listaExibida = lista;
+    }
+
+    // =======================================================
+    // 7. CÁLCULO DE DATA DE TÉRMINO/RETORNO AUTOMÁTICO
+    // =======================================================
+    function calcularRetorno(inicio, dias, retornoInformado) {
+      if (retornoInformado) return retornoInformado;
+      if (!inicio || !dias || isNaN(dias)) return "-";
+
+      let d = new Date(inicio);
+      d.setDate(d.getDate() + parseInt(dias));
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    function obterClasseStatus(status) {
+      const st = (status || "").toUpperCase();
+      if (st.includes("PRONTO")) return "status-pronto";
+      if (st.includes("FERIAS") || st.includes("FÉRIAS")) return "status-ferias";
+      if (st.includes("LTS")) return "status-lts";
+      if (st.includes("LICENÇA") || st.includes("LISP")) return "status-licenca";
+      if (st.includes("CURSO")) return "status-curso";
+      return "status-inativo";
+    }
+
+    // =======================================================
+    // 8. EXIBIÇÃO DA FICHA FUNCIONAL DO MILITAR (CARTÃO 3X4)
+    // =======================================================
+    function abrirFichaMilitar(index) {
+      const m = window.listaExibida[index];
+      if (!m) return;
+
+      // Foto 3x4 ou Avatar padrão caso não possua foto
+      const fotoUrl = m.FOTO_URL && m.FOTO_URL.startsWith("http") 
+        ? m.FOTO_URL 
+        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+      document.getElementById("ficha-foto").src = fotoUrl;
+      document.getElementById("ficha-posto-guerra").innerText = `${m.POST_GRAD || ''} ${m.NOME_GUERRA || ''}`;
+      document.getElementById("ficha-nome-completo").innerText = m.NOME_COMPLETO || '';
+      
+      document.getElementById("ficha-matricula").innerText = m.MATRICULA || '-';
+      document.getElementById("ficha-cpf").innerText = m.CPF || '-';
+      document.getElementById("ficha-rg").innerText = m.RG || '-';
+      document.getElementById("ficha-re").innerText = m.RE || '-';
+      document.getElementById("ficha-inclusao").innerText = m.INCLUSAO || '-';
+      document.getElementById("ficha-nota").innerText = m.NOTA || '-';
+      document.getElementById("ficha-unidade").innerText = m.UNIDADE || '-';
+
+      const statusClass = obterClasseStatus(m.STATUS);
+      document.getElementById("ficha-status").innerHTML = `<span class="badge badge-status ${statusClass}">${m.STATUS || 'PRONTO'}</span>`;
+      document.getElementById("ficha-retorno").innerText = calcularRetorno(m.INICIO_AFASTAMENTO, m.DIAS_AFASTAMENTO, m.RETORNO);
+      document.getElementById("ficha-obs").innerText = m.OBSERVACAO || "Nenhuma observação registrada.";
+
+      const modal = new bootstrap.Modal(document.getElementById('modalFichaMilitar'));
+      modal.show();
+    }
+  </script>
 </body>
 </html>
