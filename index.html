@@ -3,25 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>5º COMANDO REGIONAL - Gestão de Efetivo e Prontidão</title>
+  
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
     body {
       background-color: #0b1325;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0;
+      padding: 15px;
     }
     .login-card {
       background: #ffffff;
       border-radius: 12px;
-      padding: 35px;
+      padding: 30px;
       width: 100%;
       max-width: 420px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
@@ -32,57 +41,112 @@
       color: #0d6efd;
       margin-bottom: 10px;
     }
-    .btn-custom {
-      background-color: #0d6efd;
-      border: none;
-      font-weight: 600;
-      padding: 12px;
-    }
     #dashboard-view {
       display: none;
       width: 100%;
-      max-width: 1100px;
+      max-width: 1350px;
+      margin: 15px auto;
       background: #ffffff;
       border-radius: 12px;
-      padding: 30px;
-      margin: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .header-brasoes {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 2px solid #0d6efd;
+      padding-bottom: 12px;
+      margin-bottom: 15px;
+    }
+    .brasao-img {
+      height: 60px;
+      width: auto;
+      object-fit: contain;
+    }
+    .card-militar {
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      background: #f8f9fa;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-militar:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      border-color: #0d6efd;
+    }
+    .foto-militar {
+      width: 90px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 2px solid #0d6efd;
+      background-color: #e9ecef;
+    }
+    .foto-modal {
+      width: 120px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 3px solid #0d6efd;
+    }
+    .card-counter {
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      color: #fff;
+    }
+    @media print {
+      body { background: white; }
+      #login-view, .no-print { display: none !important; }
+      #dashboard-view { box-shadow: none; margin: 0; width: 100%; }
     }
   </style>
 </head>
 <body>
 
   <!-- ================= TELA DE LOGIN ================= -->
-  <div id="login-view" class="login-card">
-    <div class="shield-icon">
-      <i class="fa-solid fa-shield-halved"></i>
+  <div id="login-view" class="login-container">
+    <div class="login-card">
+      <div class="shield-icon">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h4 class="fw-bold mb-1">5º COMANDO REGIONAL</h4>
+      <p class="text-muted small mb-4">Gestão de Efetivo e Prontidão</p>
+
+      <div id="alerta-login" class="alert alert-danger p-2 small d-none"></div>
+
+      <form onsubmit="efetuarLogin(event)">
+        <div class="mb-3 text-start">
+          <label for="login-cpf" class="form-label text-muted small fw-bold">CPF (Apenas Números)</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-address-card"></i></span>
+            <input type="text" class="form-control" id="login-cpf" placeholder="Digite seu CPF" required maxlength="11">
+          </div>
+        </div>
+
+        <div class="mb-4 text-start">
+          <label for="login-senha" class="form-label text-muted small fw-bold">Senha</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+            <input type="password" class="form-control" id="login-senha" placeholder="Digite sua senha" required>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-entrar" class="btn btn-primary btn-custom w-100">
+          <i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA
+        </button>
+      </form>
     </div>
-    <h4 class="fw-bold mb-1">5º COMANDO REGIONAL</h4>
-    <p class="text-muted small mb-4">Sistema de Gestão de Efetivo e Prontidão</p>
-
-    <!-- Alerta de Erro -->
-    <div id="alerta-login" class="alert alert-danger p-2 small d-none" role="alert"></div>
-
-    <form onsubmit="efetuarLogin(event)">
-      <div class="mb-3 text-start">
-        <label for="login-cpf" class="form-label text-muted small fw-bold">CPF (Apenas Números)</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="fa-solid fa-address-card"></i></span>
-          <input type="text" class="form-control" id="login-cpf" placeholder="Digite seu CPF" required maxlength="11">
-        </div>
-      </div>
-
-      <div class="mb-4 text-start">
-        <label for="login-senha" class="form-label text-muted small fw-bold">Senha</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-          <input type="password" class="form-control" id="login-senha" placeholder="Digite sua senha" required>
-        </div>
-      </div>
-
-      <button type="submit" id="btn-entrar" class="btn btn-primary btn-custom w-100">
-        <i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA
-      </button>
-    </form>
   </div>
 
   <!-- ================= MODAL PRIMEIRO ACESSO ================= -->
@@ -114,51 +178,217 @@
 
   <!-- ================= TELA PRINCIPAL (DASHBOARD) ================= -->
   <div id="dashboard-view">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-      <div>
-        <h3 class="fw-bold mb-0">Painel de Gestão e Efetivo</h3>
-        <p class="text-muted mb-0">Policial: <span id="user-nome" class="fw-bold text-primary"></span> | Permissão: <span id="user-permissao" class="badge bg-secondary"></span></p>
+    
+    <!-- CABEÇALHO COM BRASÕES -->
+    <div class="header-brasoes">
+      <div class="d-flex align-items-center gap-2">
+        <i class="fa-solid fa-shield-halved fa-2x text-primary"></i>
+        <!-- Espaço reservado para colocar seus URLs de Imagem dos Brasões se desejar -->
+        <!-- <img src="URL_BRASAO_PMMT.png" class="brasao-img" alt="PMMT"> -->
+        <!-- <img src="URL_BRASAO_5CR.png" class="brasao-img" alt="5º CR"> -->
+        <!-- <img src="URL_BRASAO_2BPM.png" class="brasao-img" alt="2º BPM"> -->
       </div>
-      <button class="btn btn-outline-danger btn-sm" onclick="logout()">
-        <i class="fa-solid fa-power-off me-1"></i>Sair do Sistema
-      </button>
+      <div class="text-center">
+        <h4 class="fw-bold mb-0 text-primary">POLÍCIA MILITAR DO ESTADO DE MATO GROSSO</h4>
+        <h6 class="fw-bold text-dark mb-0">5º COMANDO REGIONAL - BARRA DO GARÇAS</h6>
+      </div>
+      <div>
+        <button class="btn btn-outline-danger btn-sm no-print" onclick="logout()">
+          <i class="fa-solid fa-power-off me-1"></i>Sair
+        </button>
+      </div>
     </div>
 
-    <div class="row g-3">
-      <div class="col-md-4">
-        <div class="card bg-light border-0 p-3 text-center">
-          <i class="fa-solid fa-users text-primary fa-2x mb-2"></i>
-          <h6 class="fw-bold text-muted mb-1">Efetivo Cadastrado</h6>
-          <h3 class="fw-bold mb-0">--</h3>
+    <!-- NOME DO USUÁRIO -->
+    <div class="d-flex justify-content-between align-items-center mb-3 text-muted small no-print">
+      <div>Policial: <strong id="user-nome" class="text-dark"></strong> | Permissão: <span id="user-permissao" class="badge bg-secondary"></span></div>
+      <button class="btn btn-sm btn-outline-secondary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i>Imprimir / PDF</button>
+    </div>
+
+    <!-- SELETOR DE UNIDADE E CONTADORES DA DASHBOARD -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-12">
+        <div class="card p-3 bg-light border-0 shadow-sm">
+          <div class="row align-items-center">
+            <div class="col-md-5">
+              <label class="form-label fw-bold text-primary mb-1"><i class="fa-solid fa-building me-1"></i> Selecionar Unidade Ativa:</label>
+              <select id="select-unidade-dash" class="form-select fw-bold" onchange="atualizarFiltroUnidadeDash()">
+                <option value="TODAS">TODAS AS UNIDADES DO 5º CR</option>
+                <option value="5º COMANDO REGIONAL (5º CR)">5º COMANDO REGIONAL (5º CR)</option>
+                <option value="2º BATALHÃO DE POLÍCIA MILITAR (2º BPM)">2º BATALHÃO DE POLÍCIA MILITAR (2º BPM)</option>
+                <option value="PEL PM DE NOVO SÃO JOAQUIM">PEL PM DE NOVO SÃO JOAQUIM</option>
+                <option value="NPM DE PAREDÃO DO LESTE">NPM DE PAREDÃO DO LESTE</option>
+                <option value="NPM DE GAL CARNEIRO">NPM DE GAL CARNEIRO</option>
+                <option value="NPM DE ITAQUERÊ">NPM DE ITAQUERÊ</option>
+                <option value="NPM DE INDIANÓPOLIS">NPM DE INDIANÓPOLIS</option>
+                <option value="NPM DE ARAGUAIANA">NPM DE ARAGUAIANA</option>
+                <option value="NPM DE TORIXOREU">NPM DE TORIXOREU</option>
+                <option value="NPM DE RIBEIRÃOZINHO">NPM DE RIBEIRÃOZINHO</option>
+                <option value="NPM DE PONTAL DO ARAGUAIA">NPM DE PONTAL DO ARAGUAIA</option>
+              </select>
+            </div>
+            
+            <!-- CONTADORES DINÂMICOS -->
+            <div class="col-md-7">
+              <div class="row g-2 text-center">
+                <div class="col-4">
+                  <div class="card-counter bg-primary">
+                    <div class="small text-white-50">Efetivo Ativo</div>
+                    <h3 class="fw-bold mb-0" id="cnt-ativo">0</h3>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="card-counter bg-success">
+                    <div class="small text-white-50">Em Prontidão</div>
+                    <h3 class="fw-bold mb-0" id="cnt-pronto">0</h3>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="card-counter bg-warning text-dark">
+                    <div class="small text-dark-50">Afastados</div>
+                    <h3 class="fw-bold mb-0" id="cnt-afastados">0</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="card bg-light border-0 p-3 text-center">
-          <i class="fa-solid fa-shield text-success fa-2x mb-2"></i>
-          <h6 class="fw-bold text-muted mb-1">Efetivo em Prontidão</h6>
-          <h3 class="fw-bold mb-0">--</h3>
+    </div>
+
+    <!-- ABAS DO SISTEMA (BUSCA VISUAL OU RELATÓRIOS) -->
+    <ul class="nav nav-tabs mb-3 no-print" id="tabMenu" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active fw-bold" id="tab-efetivo" data-bs-toggle="tab" data-bs-target="#content-efetivo" type="button">
+          <i class="fa-solid fa-users me-1"></i> Efetivo (Cards)
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link fw-bold" id="tab-relatorios" data-bs-toggle="tab" data-bs-target="#content-relatorios" type="button">
+          <i class="fa-solid fa-file-invoice me-1"></i> Gerar Relatórios
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- CONTEÚDO TAB 1: EFETIVO (CARDS) -->
+      <div class="tab-pane fade show active" id="content-efetivo">
+        <div class="row g-2 mb-3 no-print">
+          <div class="col-md-6">
+            <input type="text" id="filtro-busca" class="form-control" placeholder="Buscar por Nome, Nome de Guerra, Matrícula ou Posto..." oninput="filtrarEfetivo()">
+          </div>
+          <div class="col-md-6">
+            <select id="filtro-status" class="form-select" onchange="filtrarEfetivo()">
+              <option value="">Todos os Status Ativos</option>
+              <option value="PRONTO">PRONTO</option>
+              <option value="AFASTADO">AFASTADO / LICENÇA</option>
+              <option value="INATIVO_ALL">EXIBIR TAMBÉM RESERVA / TRANSFERIDOS</option>
+            </select>
+          </div>
         </div>
+
+        <div id="loading-efetivo" class="text-center py-5">
+          <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2"></i>
+          <p class="text-muted">Carregando efetivo...</p>
+        </div>
+
+        <div id="grid-efetivo" class="row g-3"></div>
       </div>
-      <div class="col-md-4">
-        <div class="card bg-light border-0 p-3 text-center">
-          <i class="fa-solid fa-user-check text-info fa-2x mb-2"></i>
-          <h6 class="fw-bold text-muted mb-1">Sessão Ativa</h6>
-          <span class="badge bg-success w-50 mx-auto mt-1">Conectado</span>
+
+      <!-- CONTEÚDO TAB 2: RELATÓRIOS -->
+      <div class="tab-pane fade" id="content-relatorios">
+        <div class="card p-3 mb-3 bg-light no-print">
+          <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-filter me-1"></i> Opções de Relatório</h6>
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Tipo de Relatório:</label>
+              <select id="rel-tipo" class="form-select">
+                <option value="ANTIGUIDADE">Almanaque / Antiguidade (Inclusão e Nota)</option>
+                <option value="POST_GRAD">Por Posto / Graduação</option>
+                <option value="AFASTAMENTOS">Relatório de Afastamentos / Licenças</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Filtrar Unidade do Relatório:</label>
+              <select id="rel-unidade" class="form-select">
+                <option value="TODAS">Todas as Unidades do 5º CR</option>
+                <option value="5º COMANDO REGIONAL (5º CR)">5º COMANDO REGIONAL (5º CR)</option>
+                <option value="2º BATALHÃO DE POLÍCIA MILITAR (2º BPM)">2º BATALHÃO DE POLÍCIA MILITAR (2º BPM)</option>
+                <option value="PEL PM DE NOVO SÃO JOAQUIM">PEL PM DE NOVO SÃO JOAQUIM</option>
+                <option value="NPM DE PAREDÃO DO LESTE">NPM DE PAREDÃO DO LESTE</option>
+                <option value="NPM DE GAL CARNEIRO">NPM DE GAL CARNEIRO</option>
+                <option value="NPM DE ITAQUERÊ">NPM DE ITAQUERÊ</option>
+                <option value="NPM DE INDIANÓPOLIS">NPM DE INDIANÓPOLIS</option>
+                <option value="NPM DE ARAGUAIANA">NPM DE ARAGUAIANA</option>
+                <option value="NPM DE TORIXOREU">NPM DE TORIXOREU</option>
+                <option value="NPM DE RIBEIRÃOZINHO">NPM DE RIBEIRÃOZINHO</option>
+                <option value="NPM DE PONTAL DO ARAGUAIA">NPM DE PONTAL DO ARAGUAIA</option>
+              </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button class="btn btn-primary w-100 fw-bold" onclick="gerarRelatorio()"><i class="fa-solid fa-list-check me-1"></i> Gerar Relatório</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultado-relatorio" class="table-responsive"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= MODAL CARTÃO DO MILITAR (FICHA DETALHADA) ================= -->
+  <div class="modal fade" id="modalMilitar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title fw-bold" id="modal-titulo-militar"><i class="fa-solid fa-id-card me-2"></i>Ficha Funcional</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row align-items-center mb-3 text-center text-md-start">
+            <div class="col-md-4 text-center mb-2 mb-md-0">
+              <img id="modal-foto" src="" class="foto-modal" alt="Foto PM">
+            </div>
+            <div class="col-md-8">
+              <h5 class="fw-bold text-primary mb-0" id="modal-nome-guerra"></h5>
+              <div class="text-muted small mb-2" id="modal-nome-completo"></div>
+              <span class="badge bg-success" id="modal-status"></span>
+              <div class="mt-2 text-secondary small" id="modal-unidade"></div>
+            </div>
+          </div>
+
+          <table class="table table-sm table-bordered mb-0 small">
+            <tbody>
+              <tr><th class="bg-light" style="width:40%;">Matrícula:</th><td id="modal-matricula"></td></tr>
+              <tr><th class="bg-light">CPF:</th><td id="modal-cpf"></td></tr>
+              <tr><th class="bg-light">Posto/Graduação:</th><td id="modal-postgrad"></td></tr>
+              <tr><th class="bg-light">RG / RE:</th><td id="modal-rg-re"></td></tr>
+              <tr><th class="bg-light">Data de Inclusão:</th><td id="modal-inclusao"></td></tr>
+              <tr><th class="bg-light">Última Promoção:</th><td id="modal-promocao"></td></tr>
+              <tr><th class="bg-light">Nota de Classificação:</th><td id="modal-nota" class="fw-bold text-primary"></td></tr>
+              <tr><th class="bg-light">Afastamento/Retorno:</th><td id="modal-afastamento"></td></tr>
+              <tr><th class="bg-light">Observação:</th><td id="modal-obs"></td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // URL atualizada da implantação do Apps Script
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycxD7rsaoIl8AJBelE6Wv24qOcxXKCfEgd5vhqraicWyxlofrPmGWFKa8-SE4bpsEI/exec";
+    /* =================================================================================
+       URL ATUALIZADA DA IMPLANTAÇÃO DO GOOGLE APPS SCRIPT DO 5º CR
+       ================================================================================= */
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqRf74DRMhwYJ6pFFB_AGPo6-yvEmS5U0to99PsXmY4pnIzwOmGY9zpC4TMDyLkMp1/exec";
 
     let usuarioLogado = null;
+    let listaMilitares = [];
 
-    // Executa ao carregar a página: Mantém a sessão salva no navegador
+    // Verificação de sessão salva no navegador (evita pedir login novamente)
     window.addEventListener("DOMContentLoaded", () => {
       const sessaoSalva = localStorage.getItem("sgep_usuario");
       if (sessaoSalva) {
@@ -167,9 +397,11 @@
       }
     });
 
+    /* =================================================================================
+       FUNÇÃO DE AUTENTICAÇÃO DE LOGIN
+       ================================================================================= */
     async function efetuarLogin(event) {
       event.preventDefault();
-
       const cpf = document.getElementById("login-cpf").value.replace(/\D/g, "");
       const senha = document.getElementById("login-senha").value.trim();
       const btn = document.getElementById("btn-entrar");
@@ -180,7 +412,8 @@
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Conectando...`;
 
       try {
-        const url = `${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`;
+        // Envia requisição assíncrona ao Apps Script com controle anti-cache (?v=DataAtual)
+        const url = `${SCRIPT_URL}?v=${Date.now()}&acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`;
         const response = await fetch(url, { redirect: "follow" });
         const res = await response.json();
 
@@ -194,7 +427,6 @@
         }
 
         usuarioLogado = res;
-
         if (res.primeiroAcesso) {
           const modalSenha = new bootstrap.Modal(document.getElementById('modalTrocaSenha'));
           modalSenha.show();
@@ -205,11 +437,14 @@
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
-        alerta.innerText = "A conexão demorou muito para responder. Tente novamente em alguns instantes.";
+        alerta.innerText = "Erro ao comunicar com o servidor. Tente novamente em instantes.";
         alerta.classList.remove("d-none");
       }
     }
 
+    /* =================================================================================
+       TROCA DE SENHA NO PRIMEIRO ACESSO
+       ================================================================================= */
     async function confirmarTrocaSenha() {
       const novaSenha = document.getElementById("nova-senha").value.trim();
       const confirmaSenha = document.getElementById("confirma-senha").value.trim();
@@ -230,7 +465,7 @@
       }
 
       try {
-        const url = `${SCRIPT_URL}?acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}`;
+        const url = `${SCRIPT_URL}?v=${Date.now()}&acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}`;
         const response = await fetch(url, { redirect: "follow" });
         const res = await response.json();
 
@@ -238,7 +473,6 @@
           const modalEl = document.getElementById('modalTrocaSenha');
           const modalInstance = bootstrap.Modal.getInstance(modalEl);
           modalInstance.hide();
-          
           usuarioLogado.primeiroAcesso = false;
           localStorage.setItem("sgep_usuario", JSON.stringify(usuarioLogado));
           liberarAcessoDashboard();
@@ -247,7 +481,7 @@
           alertaModal.classList.remove("d-none");
         }
       } catch (err) {
-        alertaModal.innerText = "Erro ao atualizar a senha. Tente novamente.";
+        alertaModal.innerText = "Erro ao atualizar a senha.";
         alertaModal.classList.remove("d-none");
       }
     }
@@ -257,6 +491,280 @@
       document.getElementById("dashboard-view").style.display = "block";
       document.getElementById("user-nome").innerText = usuarioLogado.nome;
       document.getElementById("user-permissao").innerText = usuarioLogado.permissao || "Usuário";
+      carregarEfetivo();
+    }
+
+    /* =================================================================================
+       CARREGAMENTO DOS DADOS DO EFETIVO DA PLANILHA GOOGLE
+       ================================================================================= */
+    async function carregarEfetivo() {
+      const loading = document.getElementById("loading-efetivo");
+      const grid = document.getElementById("grid-efetivo");
+      loading.classList.remove("d-none");
+      grid.innerHTML = "";
+
+      try {
+        const url = `${SCRIPT_URL}?v=${Date.now()}&acao=obterEfetivo`;
+        const response = await fetch(url, { redirect: "follow" });
+        const res = await response.json();
+        loading.classList.add("d-none");
+
+        if (res.sucesso) {
+          listaMilitares = res.militares;
+          atualizarContadoresDash();
+          filtrarEfetivo();
+        } else {
+          grid.innerHTML = `<div class="col-12"><div class="alert alert-warning">${res.mensagem}</div></div>`;
+        }
+      } catch (err) {
+        loading.classList.add("d-none");
+        grid.innerHTML = `<div class="col-12"><div class="alert alert-danger">Erro ao carregar os dados do efetivo.</div></div>`;
+      }
+    }
+
+    // Filtra militares ativos (ignora Reserva Remunerada, Transferidos e Inativos dos quadros gerais)
+    function isMilitarAtivo(m) {
+      const st = String(m.STATUS || '').toUpperCase();
+      return !st.includes('RESERVA') && !st.includes('TRANSFERIDO') && !st.includes('INATIVO');
+    }
+
+    function atualizarFiltroUnidadeDash() {
+      atualizarContadoresDash();
+      filtrarEfetivo();
+    }
+
+    // Atualiza contadores numéricos da parte superior da Dashboard
+    function atualizarContadoresDash() {
+      const unidadeSel = document.getElementById("select-unidade-dash").value;
+
+      const militaresAtivosUnidade = listaMilitares.filter(m => {
+        const ativo = isMilitarAtivo(m);
+        const bateUnidade = (unidadeSel === "TODAS") || String(m.UNIDADE || '').toUpperCase().includes(unidadeSel.toUpperCase());
+        return ativo && bateUnidade;
+      });
+
+      const totalAtivo = militaresAtivosUnidade.length;
+      const prontos = militaresAtivosUnidade.filter(m => String(m.STATUS || '').toUpperCase() === 'PRONTO').length;
+      const afastados = totalAtivo - prontos;
+
+      document.getElementById("cnt-ativo").innerText = totalAtivo;
+      document.getElementById("cnt-pronto").innerText = prontos;
+      document.getElementById("cnt-afastados").innerText = afastados;
+    }
+
+    /* =================================================================================
+       FILTROS EM TEMPO REAL DA GRID DE CARDS
+       ================================================================================= */
+    function filtrarEfetivo() {
+      const busca = document.getElementById("filtro-busca").value.toLowerCase();
+      const statusFiltro = document.getElementById("filtro-status").value;
+      const unidadeSel = document.getElementById("select-unidade-dash").value;
+
+      const filtrados = listaMilitares.filter(m => {
+        const nomeComp = String(m.NOME_COMPLETO || '').toLowerCase();
+        const nomeGuer = String(m.NOME_GUERRA || '').toLowerCase();
+        const matricula = String(m.MATRICULA || '').toLowerCase();
+        const postGrad = String(m.POST_GRAD || '').toLowerCase();
+        const st = String(m.STATUS || '').toUpperCase();
+
+        const bateBusca = !busca || nomeComp.includes(busca) || nomeGuer.includes(busca) || matricula.includes(busca) || postGrad.includes(busca);
+        const bateUnidade = (unidadeSel === "TODAS") || String(m.UNIDADE || '').toUpperCase().includes(unidadeSel.toUpperCase());
+
+        let bateStatus = true;
+        if (statusFiltro === "PRONTO") {
+          bateStatus = (st === 'PRONTO');
+        } else if (statusFiltro === "AFASTADO") {
+          bateStatus = isMilitarAtivo(m) && (st !== 'PRONTO');
+        } else if (statusFiltro === "") {
+          bateStatus = isMilitarAtivo(m);
+        }
+
+        return bateBusca && bateUnidade && bateStatus;
+      });
+
+      renderizarMilitares(filtrados);
+    }
+
+    // Renderiza cada militar em estilo Card 3x4
+    function renderizarMilitares(lista) {
+      const grid = document.getElementById("grid-efetivo");
+      if (!lista || lista.length === 0) {
+        grid.innerHTML = `<div class="col-12"><div class="alert alert-info text-center">Nenhum militar encontrado com os parâmetros selecionados.</div></div>`;
+        return;
+      }
+
+      grid.innerHTML = lista.map((m) => {
+        const foto = m.FOTO_URL || 'https://via.placeholder.com/90x120?text=Foto';
+        const st = String(m.STATUS || 'PRONTO').toUpperCase();
+        let badgeClass = 'bg-success';
+
+        if (st.includes('RESERVA') || st.includes('TRANSFERIDO')) badgeClass = 'bg-secondary';
+        else if (st !== 'PRONTO') badgeClass = 'bg-warning text-dark';
+
+        return `
+          <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+            <div class="card-militar" onclick="abrirFichaMilitar('${m.MATRICULA || m.CPF}')">
+              <img src="${foto}" class="foto-militar mb-2" alt="Foto PM">
+              <div>
+                <div class="fw-bold text-dark small mb-0">${m.POST_GRAD || ''} ${m.NOME_GUERRA || ''}</div>
+                <div class="text-muted extra-small" style="font-size: 0.72rem;">Mat: ${m.MATRICULA || 'N/A'}</div>
+                <div class="text-secondary extra-small mt-1 text-truncate" style="font-size: 0.72rem;" title="${m.UNIDADE}">${m.UNIDADE || 'Não Informada'}</div>
+              </div>
+              <span class="badge ${badgeClass} mt-2 small">${st}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* =================================================================================
+       FICHA DETALHADA DO MILITAR (MODAL AO CLICAR NO CARD)
+       ================================================================================= */
+    function abrirFichaMilitar(identificador) {
+      const m = listaMilitares.find(item => String(item.MATRICULA) === String(identificador) || String(item.CPF) === String(identificador));
+      if (!m) return;
+
+      document.getElementById("modal-foto").src = m.FOTO_URL || 'https://via.placeholder.com/120x160?text=Sem+Foto';
+      document.getElementById("modal-nome-guerra").innerText = `${m.POST_GRAD || ''} ${m.NOME_GUERRA || m.NOME_COMPLETO}`;
+      document.getElementById("modal-nome-completo").innerText = m.NOME_COMPLETO || '';
+      document.getElementById("modal-status").innerText = m.STATUS || 'PRONTO';
+      document.getElementById("modal-unidade").innerText = `Unidade: ${m.UNIDADE || 'Não informada'}`;
+
+      document.getElementById("modal-matricula").innerText = m.MATRICULA || '-';
+      document.getElementById("modal-cpf").innerText = m.CPF || '-';
+      document.getElementById("modal-postgrad").innerText = m.POST_GRAD || '-';
+      document.getElementById("modal-rg-re").innerText = `${m.RG || '-'} / ${m.RE || '-'}`;
+      document.getElementById("modal-inclusao").innerText = m.INCLUSAO || '-';
+      document.getElementById("modal-promocao").innerText = m.PROMOCAO || '-';
+      document.getElementById("modal-nota").innerText = m.NOTA || '0.00';
+      document.getElementById("modal-afastamento").innerText = m.INICIO_AFASTAMENTO ? `${m.INICIO_AFASTAMENTO} (${m.DIAS_AFASTAMENTO || 0} dias) - Retorno: ${m.RETORNO || '-'}` : 'Nenhum';
+      document.getElementById("modal-obs").innerText = m.OBSERVACAO || '-';
+
+      const modal = new bootstrap.Modal(document.getElementById('modalMilitar'));
+      modal.show();
+    }
+
+    /* =================================================================================
+       MÓDULO DE EMISSÃO DE RELATÓRIOS (ALMANAQUE, POSTO/GRAD E AFASTAMENTOS)
+       ================================================================================= */
+    function gerarRelatorio() {
+      const tipo = document.getElementById("rel-tipo").value;
+      const unidadeSel = document.getElementById("rel-unidade").value;
+      const container = document.getElementById("resultado-relatorio");
+
+      let dados = listaMilitares.filter(m => {
+        const ativo = isMilitarAtivo(m);
+        const bateUnidade = (unidadeSel === "TODAS") || String(m.UNIDADE || '').toUpperCase().includes(unidadeSel.toUpperCase());
+        return ativo && bateUnidade;
+      });
+
+      if (tipo === "ANTIGUIDADE") {
+        // Ordenação por antiguidade: 1º Data de Inclusão, 2º Nota (Maior nota desempata)
+        dados.sort((a, b) => {
+          const dataA = new Date(a.INCLUSAO || '2099-01-01');
+          const dataB = new Date(b.INCLUSAO || '2099-01-01');
+
+          if (dataA - dataB !== 0) {
+            return dataA - dataB;
+          }
+          const notaA = parseFloat(a.NOTA) || 0;
+          const notaB = parseFloat(b.NOTA) || 0;
+          return notaB - notaA;
+        });
+
+        container.innerHTML = `
+          <h5 class="fw-bold text-center my-3">RELATÓRIO DE ANTIGUIDADE E CLASSIFICAÇÃO (${unidadeSel})</h5>
+          <table class="table table-striped table-bordered align-middle small">
+            <thead class="table-dark">
+              <tr>
+                <th>Class.</th>
+                <th>Matrícula</th>
+                <th>Posto / Grad.</th>
+                <th>Nome de Guerra</th>
+                <th>Nome Completo</th>
+                <th>Data Inclusão</th>
+                <th>Nota Desempate</th>
+                <th>Unidade</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dados.map((m, idx) => `
+                <tr>
+                  <td class="fw-bold text-center">${idx + 1}º</td>
+                  <td>${m.MATRICULA || '-'}</td>
+                  <td>${m.POST_GRAD || '-'}</td>
+                  <td class="fw-bold">${m.NOME_GUERRA || '-'}</td>
+                  <td>${m.NOME_COMPLETO || '-'}</td>
+                  <td>${m.INCLUSAO || '-'}</td>
+                  <td class="fw-bold text-primary">${m.NOTA || '0.00'}</td>
+                  <td>${m.UNIDADE || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } else if (tipo === "POST_GRAD") {
+        container.innerHTML = `
+          <h5 class="fw-bold text-center my-3">RELATÓRIO DE EFETIVO POR POSTO / GRADUAÇÃO (${unidadeSel})</h5>
+          <table class="table table-bordered align-middle small">
+            <thead class="table-dark">
+              <tr>
+                <th>Posto / Graduação</th>
+                <th>Matrícula</th>
+                <th>Nome de Guerra</th>
+                <th>Unidade</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dados.map(m => `
+                <tr>
+                  <td class="fw-bold">${m.POST_GRAD || 'NÃO INFORMADO'}</td>
+                  <td>${m.MATRICULA || '-'}</td>
+                  <td>${m.NOME_GUERRA || m.NOME_COMPLETO}</td>
+                  <td>${m.UNIDADE || '-'}</td>
+                  <td><span class="badge ${m.STATUS === 'PRONTO' ? 'bg-success' : 'bg-warning text-dark'}">${m.STATUS}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } else if (tipo === "AFASTAMENTOS") {
+        const afastados = dados.filter(m => String(m.STATUS || '').toUpperCase() !== 'PRONTO');
+
+        container.innerHTML = `
+          <h5 class="fw-bold text-center my-3">RELATÓRIO DE AFASTAMENTOS E LICENÇAS (${unidadeSel})</h5>
+          <table class="table table-danger table-striped table-bordered align-middle small">
+            <thead>
+              <tr>
+                <th>Matrícula</th>
+                <th>Posto / Grad.</th>
+                <th>Nome</th>
+                <th>Status / Motivo</th>
+                <th>Início Afast.</th>
+                <th>Dias</th>
+                <th>Previsão Retorno</th>
+                <th>Unidade</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${afastados.length === 0 ? '<tr><td colspan="8" class="text-center">Nenhum militar afastado nesta unidade.</td></tr>' : 
+                afastados.map(m => `
+                <tr>
+                  <td>${m.MATRICULA || '-'}</td>
+                  <td>${m.POST_GRAD || '-'}</td>
+                  <td class="fw-bold">${m.NOME_GUERRA || m.NOME_COMPLETO}</td>
+                  <td><span class="badge bg-warning text-dark">${m.STATUS}</span></td>
+                  <td>${m.INICIO_AFASTAMENTO || '-'}</td>
+                  <td>${m.DIAS_AFASTAMENTO || '-'}</td>
+                  <td class="fw-bold text-danger">${m.RETORNO || '-'}</td>
+                  <td>${m.UNIDADE || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
     }
 
     function logout() {
@@ -265,7 +773,7 @@
       document.getElementById("login-cpf").value = "";
       document.getElementById("login-senha").value = "";
       document.getElementById("dashboard-view").style.display = "none";
-      document.getElementById("login-view").style.display = "block";
+      document.getElementById("login-view").style.display = "flex";
     }
   </script>
 </body>
