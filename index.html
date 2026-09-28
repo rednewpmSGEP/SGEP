@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>5º COMANDO REGIONAL - Gestão de Efetivo e Prontidão</title>
   <!-- Bootstrap 5 CSS -->
@@ -139,7 +138,7 @@
 
     let usuarioLogado = null;
 
-    function efetuarLogin(event) {
+    async function efetuarLogin(event) {
       event.preventDefault();
 
       const cpf = document.getElementById("login-cpf").value.replace(/\D/g, "");
@@ -151,12 +150,10 @@
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Conectando...`;
 
-      const callbackName = 'cb_' + Math.floor(Math.random() * 1000000);
-
-      window[callbackName] = function(res) {
-        delete window[callbackName];
-        const elem = document.getElementById(callbackName);
-        if (elem) elem.remove();
+      try {
+        const url = `${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`;
+        const response = await fetch(url, { redirect: "follow" });
+        const res = await response.json();
 
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
@@ -175,23 +172,15 @@
         } else {
           liberarAcessoDashboard();
         }
-      };
-
-      const scriptTag = document.createElement('script');
-      scriptTag.id = callbackName;
-      scriptTag.src = `${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}&prefix=${callbackName}`;
-      
-      scriptTag.onerror = function() {
+      } catch (err) {
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
-        alerta.innerText = "Erro ao conectar. Tente recarregar a página (Ctrl + F5).";
+        alerta.innerText = "Erro ao conectar com o servidor. Verifique sua conexão.";
         alerta.classList.remove("d-none");
-      };
-
-      document.body.appendChild(scriptTag);
+      }
     }
 
-    function confirmarTrocaSenha() {
+    async function confirmarTrocaSenha() {
       const novaSenha = document.getElementById("nova-senha").value.trim();
       const confirmaSenha = document.getElementById("confirma-senha").value.trim();
       const alertaModal = document.getElementById("alerta-modal");
@@ -210,12 +199,10 @@
         return;
       }
 
-      const callbackName = 'cb_senha_' + Math.floor(Math.random() * 1000000);
-
-      window[callbackName] = function(res) {
-        delete window[callbackName];
-        const elem = document.getElementById(callbackName);
-        if (elem) elem.remove();
+      try {
+        const url = `${SCRIPT_URL}?acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}`;
+        const response = await fetch(url, { redirect: "follow" });
+        const res = await response.json();
 
         if (res.sucesso) {
           const modalEl = document.getElementById('modalTrocaSenha');
@@ -226,13 +213,10 @@
           alertaModal.innerText = res.mensagem;
           alertaModal.classList.remove("d-none");
         }
-      };
-
-      const scriptTag = document.createElement('script');
-      scriptTag.id = callbackName;
-      scriptTag.src = `${SCRIPT_URL}?acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}&prefix=${callbackName}`;
-      
-      document.body.appendChild(scriptTag);
+      } catch (err) {
+        alertaModal.innerText = "Erro ao atualizar a senha. Tente novamente.";
+        alertaModal.classList.remove("d-none");
+      }
     }
 
     function liberarAcessoDashboard() {
