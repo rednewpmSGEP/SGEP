@@ -361,7 +361,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkN0oj9BNIow8FnOZV_NqVAKcMwIwFEt5WJN0QaxDyA8xiNu7-QS-Du0Q9NhNVOTo/exec";
+    // URL ATUALIZADA DA IMPLANTAÇÃO
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLJ6vKcSOjSLrog1YWQe2OPoeZdohQa2sDlAVNnHjTnKmMx08ZcAJmh2jRnEfcVs-m/exec";
 
     let usuarioLogado = null;
     let listaMilitares = [];
@@ -470,12 +471,11 @@
     }
 
     function liberarAcessoDashboard() {
-      // Esconde o login e exibe a Dashboard
       const loginView = document.getElementById("login-view");
       const dashView = document.getElementById("dashboard-view");
       
-      if (loginView) loginView.style.display = "none";
-      if (dashView) dashView.style.display = "block";
+      if (loginView) loginView.style.setProperty("display", "none", "important");
+      if (dashView) dashView.style.setProperty("display", "block", "important");
       
       if (usuarioLogado) {
         document.getElementById("user-nome").innerText = usuarioLogado.nome || "Policial";
@@ -483,6 +483,19 @@
       }
 
       carregarEfetivo();
+    }
+
+    function getProp(obj, chaves) {
+      if (!obj) return "";
+      for (let i = 0; i < chaves.length; i++) {
+        let kProcurada = chaves[i].toUpperCase();
+        for (let key in obj) {
+          if (key.toUpperCase() === kProcurada && obj[key] !== undefined && obj[key] !== null) {
+            return String(obj[key]).trim();
+          }
+        }
+      }
+      return "";
     }
 
     async function carregarEfetivo() {
@@ -511,18 +524,8 @@
       }
     }
 
-    function getValorProp(obj, chave) {
-      if (!obj) return "";
-      if (obj[chave] !== undefined) return obj[chave];
-      const chaveUpper = chave.toUpperCase();
-      for (let k in obj) {
-        if (k.toUpperCase() === chaveUpper) return obj[k];
-      }
-      return "";
-    }
-
     function isMilitarAtivo(m) {
-      const st = String(getValorProp(m, 'STATUS')).toUpperCase();
+      const st = getProp(m, ['STATUS']).toUpperCase();
       return !st.includes('RESERVA') && !st.includes('TRANSFERIDO') && !st.includes('INATIVO');
     }
 
@@ -536,13 +539,17 @@
 
       const militaresAtivosUnidade = listaMilitares.filter(m => {
         const ativo = isMilitarAtivo(m);
-        const und = String(getValorProp(m, 'UNIDADE')).toUpperCase();
-        const bateUnidade = (unidadeSel === "TODAS") || und.includes(unidadeSel.toUpperCase());
+        const und = getProp(m, ['UNIDADE']).toUpperCase();
+        const undEfetiva = und === "" ? "5º COMANDO REGIONAL (5º CR)" : und;
+        const bateUnidade = (unidadeSel === "TODAS") || undEfetiva.includes(unidadeSel.toUpperCase());
         return ativo && bateUnidade;
       });
 
       const totalAtivo = militaresAtivosUnidade.length;
-      const prontos = militaresAtivosUnidade.filter(m => String(getValorProp(m, 'STATUS')).toUpperCase() === 'PRONTO').length;
+      const prontos = militaresAtivosUnidade.filter(m => {
+        const st = getProp(m, ['STATUS']).toUpperCase();
+        return st === 'PRONTO' || st === '';
+      }).length;
       const afastados = totalAtivo - prontos;
 
       document.getElementById("cnt-ativo").innerText = totalAtivo;
@@ -556,21 +563,24 @@
       const unidadeSel = document.getElementById("select-unidade-dash").value;
 
       const filtrados = listaMilitares.filter(m => {
-        const nomeComp = String(getValorProp(m, 'NOME_COMPLETO')).toLowerCase();
-        const nomeGuer = String(getValorProp(m, 'NOME_GUERRA')).toLowerCase();
-        const matricula = String(getValorProp(m, 'MATRICULA')).toLowerCase();
-        const postGrad = String(getValorProp(m, 'POST_GRAD')).toLowerCase();
-        const und = String(getValorProp(m, 'UNIDADE')).toUpperCase();
-        const st = String(getValorProp(m, 'STATUS')).toUpperCase();
+        const nomeComp = getProp(m, ['NOME_COMPLETO']).toLowerCase();
+        const nomeGuer = getProp(m, ['NOME_GUERA', 'NOME_GUERRA']).toLowerCase();
+        const matricula = getProp(m, ['MATRICULA']).toLowerCase();
+        const postGrad = getProp(m, ['POST_GRAD']).toLowerCase();
+        const und = getProp(m, ['UNIDADE']).toUpperCase();
+        const st = getProp(m, ['STATUS']).toUpperCase();
+
+        const undEfetiva = und === "" ? "5º COMANDO REGIONAL (5º CR)" : und;
+        const stEfetivo = st === "" ? "PRONTO" : st;
 
         const bateBusca = !busca || nomeComp.includes(busca) || nomeGuer.includes(busca) || matricula.includes(busca) || postGrad.includes(busca);
-        const bateUnidade = (unidadeSel === "TODAS") || und.includes(unidadeSel.toUpperCase());
+        const bateUnidade = (unidadeSel === "TODAS") || undEfetiva.includes(unidadeSel.toUpperCase());
 
         let bateStatus = true;
         if (statusFiltro === "PRONTO") {
-          bateStatus = (st === 'PRONTO');
+          bateStatus = (stEfetivo === 'PRONTO');
         } else if (statusFiltro === "AFASTADO") {
-          bateStatus = isMilitarAtivo(m) && (st !== 'PRONTO');
+          bateStatus = isMilitarAtivo(m) && (stEfetivo !== 'PRONTO');
         } else if (statusFiltro === "") {
           bateStatus = isMilitarAtivo(m);
         }
@@ -591,12 +601,12 @@
       }
 
       grid.innerHTML = lista.map((m) => {
-        const foto = getValorProp(m, 'FOTO_URL') || 'https://via.placeholder.com/90x120?text=Foto';
-        const st = String(getValorProp(m, 'STATUS') || 'PRONTO').toUpperCase();
-        const postGrad = getValorProp(m, 'POST_GRAD');
-        const nomeGuerra = getValorProp(m, 'NOME_GUERRA') || getValorProp(m, 'NOME_COMPLETO');
-        const matricula = getValorProp(m, 'MATRICULA');
-        const unidade = getValorProp(m, 'UNIDADE');
+        const foto = getProp(m, ['FOTO_URL']) || 'https://via.placeholder.com/90x120?text=Foto';
+        const st = getProp(m, ['STATUS']).toUpperCase() || 'PRONTO';
+        const postGrad = getProp(m, ['POST_GRAD']);
+        const nomeGuerra = getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || getProp(m, ['NOME_COMPLETO']);
+        const matricula = getProp(m, ['MATRICULA']);
+        const unidade = getProp(m, ['UNIDADE']) || '5º CR';
 
         let badgeClass = 'bg-success';
         if (st.includes('RESERVA') || st.includes('TRANSFERIDO')) badgeClass = 'bg-secondary';
@@ -604,12 +614,12 @@
 
         return `
           <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-            <div class="card-militar" onclick="abrirFichaMilitar('${matricula || getValorProp(m, 'CPF')}')">
+            <div class="card-militar" onclick="abrirFichaMilitar('${matricula || getProp(m, ['CPF'])}')">
               <img src="${foto}" class="foto-militar mb-2" alt="Foto PM">
               <div>
                 <div class="fw-bold text-dark small mb-0">${postGrad || ''} ${nomeGuerra || ''}</div>
                 <div class="text-muted extra-small" style="font-size: 0.72rem;">Mat: ${matricula || 'N/A'}</div>
-                <div class="text-secondary extra-small mt-1 text-truncate" style="font-size: 0.72rem;" title="${unidade}">${unidade || 'Não Informada'}</div>
+                <div class="text-secondary extra-small mt-1 text-truncate" style="font-size: 0.72rem;" title="${unidade}">${unidade}</div>
               </div>
               <span class="badge ${badgeClass} mt-2 small">${st}</span>
             </div>
@@ -619,26 +629,26 @@
     }
 
     function abrirFichaMilitar(identificador) {
-      const m = listaMilitares.find(item => String(getValorProp(item, 'MATRICULA')) === String(identificador) || String(getValorProp(item, 'CPF')) === String(identificador));
+      const m = listaMilitares.find(item => String(getProp(item, ['MATRICULA'])) === String(identificador) || String(getProp(item, ['CPF'])) === String(identificador));
       if (!m) return;
 
-      document.getElementById("modal-foto").src = getValorProp(m, 'FOTO_URL') || 'https://via.placeholder.com/120x160?text=Sem+Foto';
-      document.getElementById("modal-nome-guerra").innerText = `${getValorProp(m, 'POST_GRAD') || ''} ${getValorProp(m, 'NOME_GUERRA') || getValorProp(m, 'NOME_COMPLETO')}`;
-      document.getElementById("modal-nome-completo").innerText = getValorProp(m, 'NOME_COMPLETO') || '';
-      document.getElementById("modal-status").innerText = getValorProp(m, 'STATUS') || 'PRONTO';
-      document.getElementById("modal-unidade").innerText = `Unidade: ${getValorProp(m, 'UNIDADE') || 'Não informada'}`;
+      document.getElementById("modal-foto").src = getProp(m, ['FOTO_URL']) || 'https://via.placeholder.com/120x160?text=Sem+Foto';
+      document.getElementById("modal-nome-guerra").innerText = `${getProp(m, ['POST_GRAD'])} ${getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || getProp(m, ['NOME_COMPLETO'])}`;
+      document.getElementById("modal-nome-completo").innerText = getProp(m, ['NOME_COMPLETO']);
+      document.getElementById("modal-status").innerText = getProp(m, ['STATUS']) || 'PRONTO';
+      document.getElementById("modal-unidade").innerText = `Unidade: ${getProp(m, ['UNIDADE']) || '5º CR'}`;
 
-      document.getElementById("modal-matricula").innerText = getValorProp(m, 'MATRICULA') || '-';
-      document.getElementById("modal-cpf").innerText = getValorProp(m, 'CPF') || '-';
-      document.getElementById("modal-postgrad").innerText = getValorProp(m, 'POST_GRAD') || '-';
-      document.getElementById("modal-rg-re").innerText = `${getValorProp(m, 'RG') || '-'} / ${getValorProp(m, 'RE') || '-'}`;
-      document.getElementById("modal-inclusao").innerText = getValorProp(m, 'INCLUSAO') || '-';
-      document.getElementById("modal-promocao").innerText = getValorProp(m, 'PROMOCAO') || '-';
-      document.getElementById("modal-nota").innerText = getValorProp(m, 'NOTA') || '0.00';
+      document.getElementById("modal-matricula").innerText = getProp(m, ['MATRICULA']) || '-';
+      document.getElementById("modal-cpf").innerText = getProp(m, ['CPF']) || '-';
+      document.getElementById("modal-postgrad").innerText = getProp(m, ['POST_GRAD']) || '-';
+      document.getElementById("modal-rg-re").innerText = `${getProp(m, ['RG']) || '-'} / ${getProp(m, ['RE']) || '-'}`;
+      document.getElementById("modal-inclusao").innerText = getProp(m, ['INCLUSAO']) || '-';
+      document.getElementById("modal-promocao").innerText = getProp(m, ['PROMOCAO']) || '-';
+      document.getElementById("modal-nota").innerText = getProp(m, ['NOTA']) || '0.00';
       
-      const iniAfast = getValorProp(m, 'INICIO_AFASTAMENTO');
-      document.getElementById("modal-afastamento").innerText = iniAfast ? `${iniAfast} (${getValorProp(m, 'DIAS_AFASTAMENTO') || 0} dias) - Retorno: ${getValorProp(m, 'RETORNO') || '-'}` : 'Nenhum';
-      document.getElementById("modal-obs").innerText = getValorProp(m, 'OBSERVACAO') || '-';
+      const iniAfast = getProp(m, ['INICIO_AFASTAMENTO']);
+      document.getElementById("modal-afastamento").innerText = iniAfast ? `${iniAfast} (${getProp(m, ['DIAS_AFASTAMENTO']) || 0} dias) - Retorno: ${getProp(m, ['RETORNO']) || '-'}` : 'Nenhum';
+      document.getElementById("modal-obs").innerText = getProp(m, ['OBSERVACAO']) || '-';
 
       try {
         const modal = new bootstrap.Modal(document.getElementById('modalMilitar'));
@@ -653,19 +663,20 @@
 
       let dados = listaMilitares.filter(m => {
         const ativo = isMilitarAtivo(m);
-        const und = String(getValorProp(m, 'UNIDADE')).toUpperCase();
-        const bateUnidade = (unidadeSel === "TODAS") || und.includes(unidadeSel.toUpperCase());
+        const und = getProp(m, ['UNIDADE']).toUpperCase();
+        const undEfetiva = und === "" ? "5º COMANDO REGIONAL (5º CR)" : und;
+        const bateUnidade = (unidadeSel === "TODAS") || undEfetiva.includes(unidadeSel.toUpperCase());
         return ativo && bateUnidade;
       });
 
       if (tipo === "ANTIGUIDADE") {
         dados.sort((a, b) => {
-          const dataA = new Date(getValorProp(a, 'INCLUSAO') || '2099-01-01');
-          const dataB = new Date(getValorProp(b, 'INCLUSAO') || '2099-01-01');
+          const dataA = new Date(getProp(a, ['INCLUSAO']) || '2099-01-01');
+          const dataB = new Date(getProp(b, ['INCLUSAO']) || '2099-01-01');
 
           if (dataA - dataB !== 0) return dataA - dataB;
-          const notaA = parseFloat(getValorProp(a, 'NOTA')) || 0;
-          const notaB = parseFloat(getValorProp(b, 'NOTA')) || 0;
+          const notaA = parseFloat(getProp(a, ['NOTA'])) || 0;
+          const notaB = parseFloat(getProp(b, ['NOTA'])) || 0;
           return notaB - notaA;
         });
 
@@ -688,13 +699,13 @@
               ${dados.map((m, idx) => `
                 <tr>
                   <td class="fw-bold text-center">${idx + 1}º</td>
-                  <td>${getValorProp(m, 'MATRICULA') || '-'}</td>
-                  <td>${getValorProp(m, 'POST_GRAD') || '-'}</td>
-                  <td class="fw-bold">${getValorProp(m, 'NOME_GUERRA') || '-'}</td>
-                  <td>${getValorProp(m, 'NOME_COMPLETO') || '-'}</td>
-                  <td>${getValorProp(m, 'INCLUSAO') || '-'}</td>
-                  <td class="fw-bold text-primary">${getValorProp(m, 'NOTA') || '0.00'}</td>
-                  <td>${getValorProp(m, 'UNIDADE') || '-'}</td>
+                  <td>${getProp(m, ['MATRICULA']) || '-'}</td>
+                  <td>${getProp(m, ['POST_GRAD']) || '-'}</td>
+                  <td class="fw-bold">${getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || '-'}</td>
+                  <td>${getProp(m, ['NOME_COMPLETO']) || '-'}</td>
+                  <td>${getProp(m, ['INCLUSAO']) || '-'}</td>
+                  <td class="fw-bold text-primary">${getProp(m, ['NOTA']) || '0.00'}</td>
+                  <td>${getProp(m, ['UNIDADE']) || '5º CR'}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -716,18 +727,21 @@
             <tbody>
               ${dados.map(m => `
                 <tr>
-                  <td class="fw-bold">${getValorProp(m, 'POST_GRAD') || 'NÃO INFORMADO'}</td>
-                  <td>${getValorProp(m, 'MATRICULA') || '-'}</td>
-                  <td>${getValorProp(m, 'NOME_GUERRA') || getValorProp(m, 'NOME_COMPLETO')}</td>
-                  <td>${getValorProp(m, 'UNIDADE') || '-'}</td>
-                  <td><span class="badge ${getValorProp(m, 'STATUS') === 'PRONTO' ? 'bg-success' : 'bg-warning text-dark'}">${getValorProp(m, 'STATUS')}</span></td>
+                  <td class="fw-bold">${getProp(m, ['POST_GRAD']) || 'NÃO INFORMADO'}</td>
+                  <td>${getProp(m, ['MATRICULA']) || '-'}</td>
+                  <td>${getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || getProp(m, ['NOME_COMPLETO'])}</td>
+                  <td>${getProp(m, ['UNIDADE']) || '5º CR'}</td>
+                  <td><span class="badge ${(getProp(m, ['STATUS']) === 'PRONTO' \vert{}\vert{} getProp(m, ['STATUS']) === '') ? 'bg-success' : 'bg-warning text-dark'}">${getProp(m, ['STATUS']) || 'PRONTO'}</span></td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
         `;
       } else if (tipo === "AFASTAMENTOS") {
-        const afastados = dados.filter(m => String(getValorProp(m, 'STATUS')).toUpperCase() !== 'PRONTO');
+        const afastados = dados.filter(m => {
+          const st = getProp(m, ['STATUS']).toUpperCase();
+          return st !== 'PRONTO' && st !== '';
+        });
 
         container.innerHTML = `
           <h5 class="fw-bold text-center my-3">RELATÓRIO DE AFASTAMENTOS E LICENÇAS (${unidadeSel})</h5>
@@ -748,14 +762,14 @@
               ${afastados.length === 0 ? '<tr><td colspan="8" class="text-center">Nenhum militar afastado nesta unidade.</td></tr>' : 
                 afastados.map(m => `
                 <tr>
-                  <td>${getValorProp(m, 'MATRICULA') || '-'}</td>
-                  <td>${getValorProp(m, 'POST_GRAD') || '-'}</td>
-                  <td class="fw-bold">${getValorProp(m, 'NOME_GUERRA') || getValorProp(m, 'NOME_COMPLETO')}</td>
-                  <td><span class="badge bg-warning text-dark">${getValorProp(m, 'STATUS')}</span></td>
-                  <td>${getValorProp(m, 'INICIO_AFASTAMENTO') || '-'}</td>
-                  <td>${getValorProp(m, 'DIAS_AFASTAMENTO') || '-'}</td>
-                  <td class="fw-bold text-danger">${getValorProp(m, 'RETORNO') || '-'}</td>
-                  <td>${getValorProp(m, 'UNIDADE') || '-'}</td>
+                  <td>${getProp(m, ['MATRICULA']) || '-'}</td>
+                  <td>${getProp(m, ['POST_GRAD']) || '-'}</td>
+                  <td class="fw-bold">${getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || getProp(m, ['NOME_COMPLETO'])}</td>
+                  <td><span class="badge bg-warning text-dark">${getProp(m, ['STATUS'])}</span></td>
+                  <td>${getProp(m, ['INICIO_AFASTAMENTO']) || '-'}</td>
+                  <td>${getProp(m, ['DIAS_AFASTAMENTO']) || '-'}</td>
+                  <td class="fw-bold text-danger">${getProp(m, ['RETORNO']) || '-'}</td>
+                  <td>${getProp(m, ['UNIDADE']) || '5º CR'}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -770,7 +784,7 @@
       document.getElementById("login-cpf").value = "";
       document.getElementById("login-senha").value = "";
       document.getElementById("dashboard-view").style.display = "none";
-      document.getElementById("login-view").style.display = "flex";
+      document.getElementById("login-view").style.setProperty("display", "flex", "important");
     }
   </script>
 </body>
