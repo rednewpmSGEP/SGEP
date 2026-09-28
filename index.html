@@ -104,7 +104,7 @@
 </head>
 <body>
 
-  <!-- ================= TELA DE LOGIN ================= -->
+  <!-- TELA DE LOGIN -->
   <div id="login-view" class="login-container">
     <div class="login-card">
       <div class="shield-icon">
@@ -139,7 +139,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL PRIMEIRO ACESSO ================= -->
+  <!-- MODAL PRIMEIRO ACESSO -->
   <div class="modal fade" id="modalTrocaSenha" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -166,7 +166,7 @@
     </div>
   </div>
 
-  <!-- ================= TELA PRINCIPAL (DASHBOARD) ================= -->
+  <!-- TELA PRINCIPAL (DASHBOARD) -->
   <div id="dashboard-view">
     
     <div class="header-brasoes">
@@ -240,7 +240,7 @@
       </div>
     </div>
 
-    <!-- ABAS DO SISTEMA -->
+    <!-- ABAS -->
     <ul class="nav nav-tabs mb-3 no-print" id="tabMenu" role="tablist">
       <li class="nav-item">
         <button class="nav-link active fw-bold" id="tab-efetivo" data-bs-toggle="tab" data-bs-target="#content-efetivo" type="button">
@@ -366,7 +366,6 @@
     let usuarioLogado = null;
     let listaMilitares = [];
 
-    // CARREGAMENTO SEGURO DA SESSÃO AO ABRIR OU RECARREGAR (F5)
     document.addEventListener("DOMContentLoaded", function() {
       const sessaoSalva = localStorage.getItem("sgep_usuario");
       if (sessaoSalva) {
@@ -378,17 +377,6 @@
         }
       }
     });
-
-    async function fetchComRetry(url, tentativas = 2) {
-      for (let i = 0; i < tentativas; i++) {
-        try {
-          const res = await fetch(url + `&_ts=${Date.now()}`, { redirect: "follow" });
-          if (res.ok) return await res.json();
-        } catch (err) {
-          if (i === tentativas - 1) throw err;
-        }
-      }
-    }
 
     async function efetuarLogin(event) {
       event.preventDefault();
@@ -402,19 +390,22 @@
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Conectando...`;
 
       try {
-        const url = `${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`;
-        const res = await fetchComRetry(url);
+        const url = `${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}&_ts=${Date.now()}`;
+        const response = await fetch(url, { redirect: "follow" });
+        const res = await response.json();
 
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
 
         if (!res || res.erro) {
-          alerta.innerText = (res && res.mensagem) ? res.mensagem : "Erro na autenticação.";
+          alerta.innerText = (res && res.mensagem) ? res.mensagem : "Erro no login";
           alerta.classList.remove("d-none");
           return;
         }
 
         usuarioLogado = res;
+        localStorage.setItem("sgep_usuario", JSON.stringify(res));
+
         if (res.primeiroAcesso) {
           try {
             const modalElement = document.getElementById('modalTrocaSenha');
@@ -424,13 +415,12 @@
             liberarAcessoDashboard();
           }
         } else {
-          localStorage.setItem("sgep_usuario", JSON.stringify(res));
           liberarAcessoDashboard();
         }
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
-        alerta.innerText = "Instabilidade de conexão com o servidor. Tente novamente.";
+        alerta.innerText = "Erro ao conectar. Tente novamente.";
         alerta.classList.remove("d-none");
       }
     }
@@ -455,8 +445,9 @@
       }
 
       try {
-        const url = `${SCRIPT_URL}?acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}`;
-        const res = await fetchComRetry(url);
+        const url = `${SCRIPT_URL}?acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}&_ts=${Date.now()}`;
+        const response = await fetch(url, { redirect: "follow" });
+        const res = await response.json();
 
         if (res && res.sucesso) {
           try {
@@ -469,7 +460,7 @@
           localStorage.setItem("sgep_usuario", JSON.stringify(usuarioLogado));
           liberarAcessoDashboard();
         } else {
-          alertaModal.innerText = (res && res.mensagem) ? res.mensagem : "Erro ao alterar a senha.";
+          alertaModal.innerText = (res && res.mensagem) ? res.mensagem : "Erro ao alterar senha.";
           alertaModal.classList.remove("d-none");
         }
       } catch (err) {
@@ -479,11 +470,15 @@
     }
 
     function liberarAcessoDashboard() {
-      document.getElementById("login-view").style.setProperty("display", "none", "important");
-      document.getElementById("dashboard-view").style.display = "block";
+      // Esconde o login e exibe a Dashboard
+      const loginView = document.getElementById("login-view");
+      const dashView = document.getElementById("dashboard-view");
+      
+      if (loginView) loginView.style.display = "none";
+      if (dashView) dashView.style.display = "block";
       
       if (usuarioLogado) {
-        document.getElementById("user-nome").innerText = usuarioLogado.nome || "";
+        document.getElementById("user-nome").innerText = usuarioLogado.nome || "Policial";
         document.getElementById("user-permissao").innerText = usuarioLogado.permissao || "Usuário";
       }
 
@@ -493,29 +488,41 @@
     async function carregarEfetivo() {
       const loading = document.getElementById("loading-efetivo");
       const grid = document.getElementById("grid-efetivo");
-      loading.classList.remove("d-none");
-      grid.innerHTML = "";
+      if (loading) loading.classList.remove("d-none");
+      if (grid) grid.innerHTML = "";
 
       try {
-        const url = `${SCRIPT_URL}?acao=obterEfetivo`;
-        const res = await fetchComRetry(url);
-        loading.classList.add("d-none");
+        const url = `${SCRIPT_URL}?acao=obterEfetivo&_ts=${Date.now()}`;
+        const response = await fetch(url, { redirect: "follow" });
+        const res = await response.json();
+        
+        if (loading) loading.classList.add("d-none");
 
         if (res && res.sucesso) {
           listaMilitares = res.militares || [];
           atualizarContadoresDash();
           filtrarEfetivo();
         } else {
-          grid.innerHTML = `<div class="col-12"><div class="alert alert-warning">${(res && res.mensagem) ? res.mensagem : "Nenhum dado retornado."}</div></div>`;
+          if (grid) grid.innerHTML = `<div class="col-12"><div class="alert alert-warning">${(res && res.mensagem) ? res.mensagem : "Nenhum dado retornado."}</div></div>`;
         }
       } catch (err) {
-        loading.classList.add("d-none");
-        grid.innerHTML = `<div class="col-12"><div class="alert alert-danger">Erro ao carregar o efetivo. Verifique sua conexão.</div></div>`;
+        if (loading) loading.classList.add("d-none");
+        if (grid) grid.innerHTML = `<div class="col-12"><div class="alert alert-danger">Erro ao carregar os militares. Verifique a planilha.</div></div>`;
       }
     }
 
+    function getValorProp(obj, chave) {
+      if (!obj) return "";
+      if (obj[chave] !== undefined) return obj[chave];
+      const chaveUpper = chave.toUpperCase();
+      for (let k in obj) {
+        if (k.toUpperCase() === chaveUpper) return obj[k];
+      }
+      return "";
+    }
+
     function isMilitarAtivo(m) {
-      const st = String(m.STATUS || '').toUpperCase();
+      const st = String(getValorProp(m, 'STATUS')).toUpperCase();
       return !st.includes('RESERVA') && !st.includes('TRANSFERIDO') && !st.includes('INATIVO');
     }
 
@@ -529,12 +536,13 @@
 
       const militaresAtivosUnidade = listaMilitares.filter(m => {
         const ativo = isMilitarAtivo(m);
-        const bateUnidade = (unidadeSel === "TODAS") || String(m.UNIDADE || '').toUpperCase().includes(unidadeSel.toUpperCase());
+        const und = String(getValorProp(m, 'UNIDADE')).toUpperCase();
+        const bateUnidade = (unidadeSel === "TODAS") || und.includes(unidadeSel.toUpperCase());
         return ativo && bateUnidade;
       });
 
       const totalAtivo = militaresAtivosUnidade.length;
-      const prontos = militaresAtivosUnidade.filter(m => String(m.STATUS || '').toUpperCase() === 'PRONTO').length;
+      const prontos = militaresAtivosUnidade.filter(m => String(getValorProp(m, 'STATUS')).toUpperCase() === 'PRONTO').length;
       const afastados = totalAtivo - prontos;
 
       document.getElementById("cnt-ativo").innerText = totalAtivo;
@@ -548,14 +556,15 @@
       const unidadeSel = document.getElementById("select-unidade-dash").value;
 
       const filtrados = listaMilitares.filter(m => {
-        const nomeComp = String(m.NOME_COMPLETO || '').toLowerCase();
-        const nomeGuer = String(m.NOME_GUERRA || '').toLowerCase();
-        const matricula = String(m.MATRICULA || '').toLowerCase();
-        const postGrad = String(m.POST_GRAD || '').toLowerCase();
-        const st = String(m.STATUS || '').toUpperCase();
+        const nomeComp = String(getValorProp(m, 'NOME_COMPLETO')).toLowerCase();
+        const nomeGuer = String(getValorProp(m, 'NOME_GUERRA')).toLowerCase();
+        const matricula = String(getValorProp(m, 'MATRICULA')).toLowerCase();
+        const postGrad = String(getValorProp(m, 'POST_GRAD')).toLowerCase();
+        const und = String(getValorProp(m, 'UNIDADE')).toUpperCase();
+        const st = String(getValorProp(m, 'STATUS')).toUpperCase();
 
         const bateBusca = !busca || nomeComp.includes(busca) || nomeGuer.includes(busca) || matricula.includes(busca) || postGrad.includes(busca);
-        const bateUnidade = (unidadeSel === "TODAS") || String(m.UNIDADE || '').toUpperCase().includes(unidadeSel.toUpperCase());
+        const bateUnidade = (unidadeSel === "TODAS") || und.includes(unidadeSel.toUpperCase());
 
         let bateStatus = true;
         if (statusFiltro === "PRONTO") {
@@ -574,27 +583,33 @@
 
     function renderizarMilitares(lista) {
       const grid = document.getElementById("grid-efetivo");
+      if (!grid) return;
+
       if (!lista || lista.length === 0) {
         grid.innerHTML = `<div class="col-12"><div class="alert alert-info text-center">Nenhum militar encontrado.</div></div>`;
         return;
       }
 
       grid.innerHTML = lista.map((m) => {
-        const foto = m.FOTO_URL || 'https://via.placeholder.com/90x120?text=Foto';
-        const st = String(m.STATUS || 'PRONTO').toUpperCase();
-        let badgeClass = 'bg-success';
+        const foto = getValorProp(m, 'FOTO_URL') || 'https://via.placeholder.com/90x120?text=Foto';
+        const st = String(getValorProp(m, 'STATUS') || 'PRONTO').toUpperCase();
+        const postGrad = getValorProp(m, 'POST_GRAD');
+        const nomeGuerra = getValorProp(m, 'NOME_GUERRA') || getValorProp(m, 'NOME_COMPLETO');
+        const matricula = getValorProp(m, 'MATRICULA');
+        const unidade = getValorProp(m, 'UNIDADE');
 
+        let badgeClass = 'bg-success';
         if (st.includes('RESERVA') || st.includes('TRANSFERIDO')) badgeClass = 'bg-secondary';
         else if (st !== 'PRONTO') badgeClass = 'bg-warning text-dark';
 
         return `
           <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-            <div class="card-militar" onclick="abrirFichaMilitar('${m.MATRICULA || m.CPF}')">
+            <div class="card-militar" onclick="abrirFichaMilitar('${matricula || getValorProp(m, 'CPF')}')">
               <img src="${foto}" class="foto-militar mb-2" alt="Foto PM">
               <div>
-                <div class="fw-bold text-dark small mb-0">${m.POST_GRAD || ''} ${m.NOME_GUERRA || ''}</div>
-                <div class="text-muted extra-small" style="font-size: 0.72rem;">Mat: ${m.MATRICULA || 'N/A'}</div>
-                <div class="text-secondary extra-small mt-1 text-truncate" style="font-size: 0.72rem;" title="${m.UNIDADE}">${m.UNIDADE || 'Não Informada'}</div>
+                <div class="fw-bold text-dark small mb-0">${postGrad || ''} ${nomeGuerra || ''}</div>
+                <div class="text-muted extra-small" style="font-size: 0.72rem;">Mat: ${matricula || 'N/A'}</div>
+                <div class="text-secondary extra-small mt-1 text-truncate" style="font-size: 0.72rem;" title="${unidade}">${unidade || 'Não Informada'}</div>
               </div>
               <span class="badge ${badgeClass} mt-2 small">${st}</span>
             </div>
@@ -604,24 +619,26 @@
     }
 
     function abrirFichaMilitar(identificador) {
-      const m = listaMilitares.find(item => String(item.MATRICULA) === String(identificador) || String(item.CPF) === String(identificador));
+      const m = listaMilitares.find(item => String(getValorProp(item, 'MATRICULA')) === String(identificador) || String(getValorProp(item, 'CPF')) === String(identificador));
       if (!m) return;
 
-      document.getElementById("modal-foto").src = m.FOTO_URL || 'https://via.placeholder.com/120x160?text=Sem+Foto';
-      document.getElementById("modal-nome-guerra").innerText = `${m.POST_GRAD || ''} ${m.NOME_GUERRA || m.NOME_COMPLETO}`;
-      document.getElementById("modal-nome-completo").innerText = m.NOME_COMPLETO || '';
-      document.getElementById("modal-status").innerText = m.STATUS || 'PRONTO';
-      document.getElementById("modal-unidade").innerText = `Unidade: ${m.UNIDADE || 'Não informada'}`;
+      document.getElementById("modal-foto").src = getValorProp(m, 'FOTO_URL') || 'https://via.placeholder.com/120x160?text=Sem+Foto';
+      document.getElementById("modal-nome-guerra").innerText = `${getValorProp(m, 'POST_GRAD') || ''} ${getValorProp(m, 'NOME_GUERRA') || getValorProp(m, 'NOME_COMPLETO')}`;
+      document.getElementById("modal-nome-completo").innerText = getValorProp(m, 'NOME_COMPLETO') || '';
+      document.getElementById("modal-status").innerText = getValorProp(m, 'STATUS') || 'PRONTO';
+      document.getElementById("modal-unidade").innerText = `Unidade: ${getValorProp(m, 'UNIDADE') || 'Não informada'}`;
 
-      document.getElementById("modal-matricula").innerText = m.MATRICULA || '-';
-      document.getElementById("modal-cpf").innerText = m.CPF || '-';
-      document.getElementById("modal-postgrad").innerText = m.POST_GRAD || '-';
-      document.getElementById("modal-rg-re").innerText = `${m.RG || '-'} / ${m.RE || '-'}`;
-      document.getElementById("modal-inclusao").innerText = m.INCLUSAO || '-';
-      document.getElementById("modal-promocao").innerText = m.PROMOCAO || '-';
-      document.getElementById("modal-nota").innerText = m.NOTA || '0.00';
-      document.getElementById("modal-afastamento").innerText = m.INICIO_AFASTAMENTO ? `${m.INICIO_AFASTAMENTO} (${m.DIAS_AFASTAMENTO || 0} dias) - Retorno: ${m.RETORNO || '-'}` : 'Nenhum';
-      document.getElementById("modal-obs").innerText = m.OBSERVACAO || '-';
+      document.getElementById("modal-matricula").innerText = getValorProp(m, 'MATRICULA') || '-';
+      document.getElementById("modal-cpf").innerText = getValorProp(m, 'CPF') || '-';
+      document.getElementById("modal-postgrad").innerText = getValorProp(m, 'POST_GRAD') || '-';
+      document.getElementById("modal-rg-re").innerText = `${getValorProp(m, 'RG') || '-'} / ${getValorProp(m, 'RE') || '-'}`;
+      document.getElementById("modal-inclusao").innerText = getValorProp(m, 'INCLUSAO') || '-';
+      document.getElementById("modal-promocao").innerText = getValorProp(m, 'PROMOCAO') || '-';
+      document.getElementById("modal-nota").innerText = getValorProp(m, 'NOTA') || '0.00';
+      
+      const iniAfast = getValorProp(m, 'INICIO_AFASTAMENTO');
+      document.getElementById("modal-afastamento").innerText = iniAfast ? `${iniAfast} (${getValorProp(m, 'DIAS_AFASTAMENTO') || 0} dias) - Retorno: ${getValorProp(m, 'RETORNO') || '-'}` : 'Nenhum';
+      document.getElementById("modal-obs").innerText = getValorProp(m, 'OBSERVACAO') || '-';
 
       try {
         const modal = new bootstrap.Modal(document.getElementById('modalMilitar'));
@@ -636,18 +653,19 @@
 
       let dados = listaMilitares.filter(m => {
         const ativo = isMilitarAtivo(m);
-        const bateUnidade = (unidadeSel === "TODAS") || String(m.UNIDADE || '').toUpperCase().includes(unidadeSel.toUpperCase());
+        const und = String(getValorProp(m, 'UNIDADE')).toUpperCase();
+        const bateUnidade = (unidadeSel === "TODAS") || und.includes(unidadeSel.toUpperCase());
         return ativo && bateUnidade;
       });
 
       if (tipo === "ANTIGUIDADE") {
         dados.sort((a, b) => {
-          const dataA = new Date(a.INCLUSAO || '2099-01-01');
-          const dataB = new Date(b.INCLUSAO || '2099-01-01');
+          const dataA = new Date(getValorProp(a, 'INCLUSAO') || '2099-01-01');
+          const dataB = new Date(getValorProp(b, 'INCLUSAO') || '2099-01-01');
 
           if (dataA - dataB !== 0) return dataA - dataB;
-          const notaA = parseFloat(a.NOTA) || 0;
-          const notaB = parseFloat(b.NOTA) || 0;
+          const notaA = parseFloat(getValorProp(a, 'NOTA')) || 0;
+          const notaB = parseFloat(getValorProp(b, 'NOTA')) || 0;
           return notaB - notaA;
         });
 
@@ -670,13 +688,13 @@
               ${dados.map((m, idx) => `
                 <tr>
                   <td class="fw-bold text-center">${idx + 1}º</td>
-                  <td>${m.MATRICULA || '-'}</td>
-                  <td>${m.POST_GRAD || '-'}</td>
-                  <td class="fw-bold">${m.NOME_GUERRA || '-'}</td>
-                  <td>${m.NOME_COMPLETO || '-'}</td>
-                  <td>${m.INCLUSAO || '-'}</td>
-                  <td class="fw-bold text-primary">${m.NOTA || '0.00'}</td>
-                  <td>${m.UNIDADE || '-'}</td>
+                  <td>${getValorProp(m, 'MATRICULA') || '-'}</td>
+                  <td>${getValorProp(m, 'POST_GRAD') || '-'}</td>
+                  <td class="fw-bold">${getValorProp(m, 'NOME_GUERRA') || '-'}</td>
+                  <td>${getValorProp(m, 'NOME_COMPLETO') || '-'}</td>
+                  <td>${getValorProp(m, 'INCLUSAO') || '-'}</td>
+                  <td class="fw-bold text-primary">${getValorProp(m, 'NOTA') || '0.00'}</td>
+                  <td>${getValorProp(m, 'UNIDADE') || '-'}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -698,18 +716,18 @@
             <tbody>
               ${dados.map(m => `
                 <tr>
-                  <td class="fw-bold">${m.POST_GRAD || 'NÃO INFORMADO'}</td>
-                  <td>${m.MATRICULA || '-'}</td>
-                  <td>${m.NOME_GUERRA || m.NOME_COMPLETO}</td>
-                  <td>${m.UNIDADE || '-'}</td>
-                  <td><span class="badge ${m.STATUS === 'PRONTO' ? 'bg-success' : 'bg-warning text-dark'}">${m.STATUS}</span></td>
+                  <td class="fw-bold">${getValorProp(m, 'POST_GRAD') || 'NÃO INFORMADO'}</td>
+                  <td>${getValorProp(m, 'MATRICULA') || '-'}</td>
+                  <td>${getValorProp(m, 'NOME_GUERRA') || getValorProp(m, 'NOME_COMPLETO')}</td>
+                  <td>${getValorProp(m, 'UNIDADE') || '-'}</td>
+                  <td><span class="badge ${getValorProp(m, 'STATUS') === 'PRONTO' ? 'bg-success' : 'bg-warning text-dark'}">${getValorProp(m, 'STATUS')}</span></td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
         `;
       } else if (tipo === "AFASTAMENTOS") {
-        const afastados = dados.filter(m => String(m.STATUS || '').toUpperCase() !== 'PRONTO');
+        const afastados = dados.filter(m => String(getValorProp(m, 'STATUS')).toUpperCase() !== 'PRONTO');
 
         container.innerHTML = `
           <h5 class="fw-bold text-center my-3">RELATÓRIO DE AFASTAMENTOS E LICENÇAS (${unidadeSel})</h5>
@@ -730,14 +748,14 @@
               ${afastados.length === 0 ? '<tr><td colspan="8" class="text-center">Nenhum militar afastado nesta unidade.</td></tr>' : 
                 afastados.map(m => `
                 <tr>
-                  <td>${m.MATRICULA || '-'}</td>
-                  <td>${m.POST_GRAD || '-'}</td>
-                  <td class="fw-bold">${m.NOME_GUERRA || m.NOME_COMPLETO}</td>
-                  <td><span class="badge bg-warning text-dark">${m.STATUS}</span></td>
-                  <td>${m.INICIO_AFASTAMENTO || '-'}</td>
-                  <td>${m.DIAS_AFASTAMENTO || '-'}</td>
-                  <td class="fw-bold text-danger">${m.RETORNO || '-'}</td>
-                  <td>${m.UNIDADE || '-'}</td>
+                  <td>${getValorProp(m, 'MATRICULA') || '-'}</td>
+                  <td>${getValorProp(m, 'POST_GRAD') || '-'}</td>
+                  <td class="fw-bold">${getValorProp(m, 'NOME_GUERRA') || getValorProp(m, 'NOME_COMPLETO')}</td>
+                  <td><span class="badge bg-warning text-dark">${getValorProp(m, 'STATUS')}</span></td>
+                  <td>${getValorProp(m, 'INICIO_AFASTAMENTO') || '-'}</td>
+                  <td>${getValorProp(m, 'DIAS_AFASTAMENTO') || '-'}</td>
+                  <td class="fw-bold text-danger">${getValorProp(m, 'RETORNO') || '-'}</td>
+                  <td>${getValorProp(m, 'UNIDADE') || '-'}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -752,7 +770,7 @@
       document.getElementById("login-cpf").value = "";
       document.getElementById("login-senha").value = "";
       document.getElementById("dashboard-view").style.display = "none";
-      document.getElementById("login-view").style.setProperty("display", "flex", "important");
+      document.getElementById("login-view").style.display = "flex";
     }
   </script>
 </body>
