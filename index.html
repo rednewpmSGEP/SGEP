@@ -134,12 +134,12 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // ⚠️ ATENÇÃO: COLE A URL DA SUA NOVA IMPLANTAÇÃO ENTRE AS ASPAS ABAIXO!
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw29Qgjd7y8rgsrf4hnqF392Lxm44Qjdr5ADaZ0ztTGvaWyvtBzs7eILWO0A8_NN-hR/exec";
+    // ⚠️ ATENÇÃO: COLE A URL DA SUA NOVA IMPLANTAÇÃO ENTRE AS ASPAS NA LINHA ABAIXO!
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyl94YDSU5fsMr1_RsrNYgj5FvbzaBt94lDdFjPmIn2nqexbijHPGmFL5WanDIDgRpb/exec";
 
     let usuarioLogado = null;
 
-    // 1. EFETUAR LOGIN VIA WEB APP
+    // 1. EFETUAR LOGIN VIA JSONP (Sem bloqueio de CORS)
     function efetuarLogin(event) {
       event.preventDefault();
 
@@ -152,15 +152,12 @@
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>Conectando...`;
 
-      // Chamada GET para evitar bloqueio de CORS com redirecionamento do Google
-      const urlFinal = `${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}`;
+      const callbackName = 'cb_' + Date.now();
 
-      fetch(urlFinal, {
-        method: "GET",
-        redirect: "follow"
-      })
-      .then(response => response.json())
-      .then(res => {
+      window[callbackName] = function(res) {
+        delete window[callbackName];
+        if (scriptTag.parentNode) scriptTag.parentNode.removeChild(scriptTag);
+
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
 
@@ -178,17 +175,22 @@
         } else {
           liberarAcessoDashboard();
         }
-      })
-      .catch(error => {
-        console.error("Erro na requisição:", error);
+      };
+
+      const scriptTag = document.createElement('script');
+      scriptTag.src = `${SCRIPT_URL}?acao=login&cpf=${encodeURIComponent(cpf)}&senha=${encodeURIComponent(senha)}&prefix=${callbackName}`;
+      
+      scriptTag.onerror = function() {
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
-        alerta.innerText = "Erro de conexão com a planilha. Verifique se publicou o Apps Script como 'Qualquer pessoa'.";
+        alerta.innerText = "Erro ao conectar. Verifique se publicou a implantação como 'Qualquer pessoa'.";
         alerta.classList.remove("d-none");
-      });
+      };
+
+      document.body.appendChild(scriptTag);
     }
 
-    // 2. TROCA DE SENHA NO PRIMEIRO ACESSO
+    // 2. TROCA DE SENHA NO PRIMEIRO ACESSO VIA JSONP
     function confirmarTrocaSenha() {
       const novaSenha = document.getElementById("nova-senha").value.trim();
       const confirmaSenha = document.getElementById("confirma-senha").value.trim();
@@ -208,21 +210,27 @@
         return;
       }
 
-      const urlFinal = `${SCRIPT_URL}?acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}`;
+      const callbackName = 'cb_senha_' + Date.now();
 
-      fetch(urlFinal, { method: "GET", redirect: "follow" })
-        .then(res => res.json())
-        .then(res => {
-          if (res.sucesso) {
-            const modalEl = document.getElementById('modalTrocaSenha');
-            const modalInstance = bootstrap.Modal.getInstance(modalEl);
-            modalInstance.hide();
-            liberarAcessoDashboard();
-          } else {
-            alertaModal.innerText = res.mensagem;
-            alertaModal.classList.remove("d-none");
-          }
-        });
+      window[callbackName] = function(res) {
+        delete window[callbackName];
+        if (scriptTag.parentNode) scriptTag.parentNode.removeChild(scriptTag);
+
+        if (res.sucesso) {
+          const modalEl = document.getElementById('modalTrocaSenha');
+          const modalInstance = bootstrap.Modal.getInstance(modalEl);
+          modalInstance.hide();
+          liberarAcessoDashboard();
+        } else {
+          alertaModal.innerText = res.mensagem;
+          alertaModal.classList.remove("d-none");
+        }
+      };
+
+      const scriptTag = document.createElement('script');
+      scriptTag.src = `${SCRIPT_URL}?acao=trocarSenha&cpf=${encodeURIComponent(usuarioLogado.cpf)}&novaSenha=${encodeURIComponent(novaSenha)}&prefix=${callbackName}`;
+      
+      document.body.appendChild(scriptTag);
     }
 
     // 3. EXIBIR TELA PRINCIPAL
