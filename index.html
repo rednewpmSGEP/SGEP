@@ -362,7 +362,7 @@
 
   <script>
     // URL DE IMPLANTAÇÃO ATUALIZADA
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBgMnEefgHXnQ4akwveI8qtGXKElIvzCZVdFxpb8X8tHmMGB_YNwU3nZBtGvEXI8mM/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVWVVcsmCrMFqZjWKtJNmVylmpFNbrY8AWfv5xtSgAg-jp3Q_IlpRHZ9WlowWhciI6/exec";
 
     let usuarioLogado = null;
     let listaMilitares = [];
@@ -421,7 +421,7 @@
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-right-to-bracket me-2"></i>ACESSAR SISTEMA`;
-        alerta.innerText = "Erro ao conectar. Tente novamente.";
+        alerta.innerText = "Erro ao conectar com o servidor. Tente novamente.";
         alerta.classList.remove("d-none");
       }
     }
@@ -561,7 +561,7 @@
 
       const filtrados = listaMilitares.filter(m => {
         const nomeComp = getProp(m, ['NOME_COMPLETO']).toLowerCase();
-        const nomeGuer = getProp(m, ['NOME_GUERA', 'NOME_GUERRA']).toLowerCase();
+        const nomeGuer = getProp(m, ['NOME_GUERRA', 'NOME_GUERA']).toLowerCase();
         const matricula = getProp(m, ['MATRICULA']).toLowerCase();
         const postGrad = getProp(m, ['POST_GRAD']).toLowerCase();
         const und = getProp(m, ['UNIDADE']).toUpperCase();
@@ -601,7 +601,7 @@
         const foto = getProp(m, ['FOTO_URL']) || 'https://via.placeholder.com/90x120?text=Foto';
         const st = getProp(m, ['STATUS']).toUpperCase() || 'PRONTO';
         const postGrad = getProp(m, ['POST_GRAD']);
-        const nomeGuerra = getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || getProp(m, ['NOME_COMPLETO']);
+        const nomeGuerra = getProp(m, ['NOME_GUERRA', 'NOME_GUERA']) || getProp(m, ['NOME_COMPLETO']);
         const matricula = getProp(m, ['MATRICULA']);
         const unidade = getProp(m, ['UNIDADE']) || '5º CR';
 
@@ -630,7 +630,7 @@
       if (!m) return;
 
       document.getElementById("modal-foto").src = getProp(m, ['FOTO_URL']) || 'https://via.placeholder.com/120x160?text=Sem+Foto';
-      document.getElementById("modal-nome-guerra").innerText = `${getProp(m, ['POST_GRAD'])} ${getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || getProp(m, ['NOME_COMPLETO'])}`;
+      document.getElementById("modal-nome-guerra").innerText = `${getProp(m, ['POST_GRAD'])} ${getProp(m, ['NOME_GUERRA', 'NOME_GUERA']) || getProp(m, ['NOME_COMPLETO'])}`;
       document.getElementById("modal-nome-completo").innerText = getProp(m, ['NOME_COMPLETO']);
       document.getElementById("modal-status").innerText = getProp(m, ['STATUS']) || 'PRONTO';
       document.getElementById("modal-unidade").innerText = `Unidade: ${getProp(m, ['UNIDADE']) || '5º CR'}`;
@@ -698,7 +698,7 @@
                   <td class="fw-bold text-center">${idx + 1}º</td>
                   <td>${getProp(m, ['MATRICULA']) || '-'}</td>
                   <td>${getProp(m, ['POST_GRAD']) || '-'}</td>
-                  <td class="fw-bold">${getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || '-'}</td>
+                  <td class="fw-bold">${getProp(m, ['NOME_GUERRA', 'NOME_GUERA']) || '-'}</td>
                   <td>${getProp(m, ['NOME_COMPLETO']) || '-'}</td>
                   <td>${getProp(m, ['INCLUSAO']) || '-'}</td>
                   <td class="fw-bold text-primary">${getProp(m, ['NOTA']) || '0.00'}</td>
@@ -726,7 +726,7 @@
                 <tr>
                   <td class="fw-bold">${getProp(m, ['POST_GRAD']) || 'NÃO INFORMADO'}</td>
                   <td>${getProp(m, ['MATRICULA']) || '-'}</td>
-                  <td>${getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || getProp(m, ['NOME_COMPLETO'])}</td>
+                  <td>${getProp(m, ['NOME_GUERRA', 'NOME_GUERA']) || getProp(m, ['NOME_COMPLETO'])}</td>
                   <td>${getProp(m, ['UNIDADE']) || '5º CR'}</td>
                   <td><span class="badge ${(getProp(m, ['STATUS']) === 'PRONTO' \vert{}\vert{} getProp(m, ['STATUS']) === '') ? 'bg-success' : 'bg-warning text-dark'}">${getProp(m, ['STATUS']) || 'PRONTO'}</span></td>
                 </tr>
@@ -761,7 +761,7 @@
                 <tr>
                   <td>${getProp(m, ['MATRICULA']) || '-'}</td>
                   <td>${getProp(m, ['POST_GRAD']) || '-'}</td>
-                  <td class="fw-bold">${getProp(m, ['NOME_GUERA', 'NOME_GUERRA']) || getProp(m, ['NOME_COMPLETO'])}</td>
+                  <td class="fw-bold">${getProp(m, ['NOME_GUERRA', 'NOME_GUERA']) || getProp(m, ['NOME_COMPLETO'])}</td>
                   <td><span class="badge bg-warning text-dark">${getProp(m, ['STATUS'])}</span></td>
                   <td>${getProp(m, ['INICIO_AFASTAMENTO']) || '-'}</td>
                   <td>${getProp(m, ['DIAS_AFASTAMENTO']) || '-'}</td>
