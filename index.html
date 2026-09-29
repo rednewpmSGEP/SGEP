@@ -728,7 +728,7 @@
                   <td>${getProp(m, ['MATRICULA']) || '-'}</td>
                   <td>${getProp(m, ['NOME_GUERRA', 'NOME_GUERA']) || getProp(m, ['NOME_COMPLETO'])}</td>
                   <td>${getProp(m, ['UNIDADE']) || '5º CR'}</td>
-                  <td><span class="badge ${(getProp(m, ['STATUS']) === 'PRONTO' \vert{}\vert{} getProp(m, ['STATUS']) === '') ? 'bg-success' : 'bg-warning text-dark'}">${getProp(m, ['STATUS']) || 'PRONTO'}</span></td>
+                  <td><span class="badge ${ (getProp(m, ['STATUS']) === 'PRONTO' || getProp(m, ['STATUS']) == '') ? 'bg-success' : 'bg-warning text-dark' }">${getProp(m, ['STATUS'])}</span></td>
                 </tr>
               `).join('')}
             </tbody>
