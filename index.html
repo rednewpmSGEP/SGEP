@@ -38,6 +38,7 @@
             background-color: var(--pmmt-azul-escuro);
             color: white;
             font-weight: 600;
+            font-size: 0.85rem;
         }
         .badge-pronto { background-color: #198754; }
         .badge-afastado { background-color: #ffc107; color: #000; }
@@ -163,7 +164,7 @@
                             <option value="AFASTADO">AFASTADO / LICENÇA</option>
                             <option value="RESERVA">RESERVA REMUNERADA</option>
                             <option value="TRANSFERIDO">TRANSFERIDOS</option>
-                            <option value="AVNM">AVNM (Atividade Voluntária)</option>
+                            <option value="AVNM">AVNM</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -173,7 +174,7 @@
                 </div>
             </div>
 
-            <!-- TABELA DE EFETIVO EM LISTA -->
+            <!-- TABELA DE EFETIVO EM LISTA (Ordem: Foto, Post/Grad, Nome, RG, CPF, Unidade, Status, Ações) -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="m-0 fw-bold" style="color: var(--pmmt-azul-escuro);"><i class="fa-solid fa-users me-2"></i> Relação de Efetivo</h5>
@@ -186,10 +187,11 @@
                         <table class="table table-hover align-middle mb-0 table-custom">
                             <thead>
                                 <tr>
-                                    <th class="ps-3" style="width: 80px;">Foto</th>
+                                    <th class="ps-3" style="width: 60px;">Foto</th>
                                     <th>Posto / Graduação</th>
-                                    <th>Matrícula</th>
-                                    <th>Nome Completo / Guerra</th>
+                                    <th>Nome de Identificação</th>
+                                    <th>RG</th>
+                                    <th>CPF</th>
                                     <th>Unidade</th>
                                     <th>Status</th>
                                     <th class="text-end pe-3">Ações</th>
@@ -222,6 +224,8 @@
                     
                     <div class="row text-start g-2 small">
                         <div class="col-6"><strong>Matrícula:</strong> <span id="modal-mat">--</span></div>
+                        <div class="col-6"><strong>RG:</strong> <span id="modal-rg">--</span></div>
+                        <div class="col-6"><strong>CPF:</strong> <span id="modal-cpf">--</span></div>
                         <div class="col-6"><strong>Unidade:</strong> <span id="modal-unidade">--</span></div>
                         <div class="col-6"><strong>Status:</strong> <span id="modal-status" class="badge bg-success">--</span></div>
                         <div class="col-6"><strong>Inclusão:</strong> <span id="modal-inclusao">--</span></div>
@@ -229,9 +233,61 @@
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-warning btn-sm fw-bold" id="btn-editar-modal" onclick="alert('Função de edição rápida.')">
-                        <i class="fa-solid fa-pen-to-square me-1"></i> Editar Cadastro
-                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO -->
+    <div class="modal fade" id="modalEdicao" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white bg-dark">
+                    <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i> Editar Dados do Policial</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="form-edicao">
+                        <input type="hidden" id="edit-index">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nome de Identificação / Completo</label>
+                            <input type="text" id="edit-nome" class="form-control" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">RG</label>
+                                <input type="text" id="edit-rg" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">CPF</label>
+                                <input type="text" id="edit-cpf" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Posto / Graduação</label>
+                                <input type="text" id="edit-posto" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Status</label>
+                                <select id="edit-status" class="form-select">
+                                    <option value="PRONTO">PRONTO</option>
+                                    <option value="AFASTADO">AFASTADO</option>
+                                    <option value="RESERVA">RESERVA REMUNERADA</option>
+                                    <option value="TRANSFERIDO">TRANSFERIDO</option>
+                                    <option value="AVNM">AVNM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Unidade</label>
+                            <input type="text" id="edit-unidade" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="salvarEdicao()">Salvar Alterações</button>
                 </div>
             </div>
         </div>
@@ -240,7 +296,6 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // URL DO GOOGLE APPS SCRIPT JÁ CONFIGURADA:
         const URL_API = "https://script.google.com/macros/s/AKfycbz_579BRexegNLgFFNgZBIMp-Fmr3tIiXPgFADSlrMRaRApEQGrjGOWKRLqxuy1bNDi/exec";
 
         let dadosGlobais = [];
@@ -307,7 +362,7 @@
         function renderizarTabela(lista) {
             const tbody = document.getElementById('tabela-efetivo-corpo');
             if(lista.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
@@ -322,24 +377,26 @@
 
                 let fotoUrl = m.FOTO_URL || 'https://via.placeholder.com/150?text=Foto+PM';
 
+                // Ordem rigorosa: Foto, Posto/Graduação, Nome de Identificação, RG, CPF, Unidade, Status, Ações
                 html += `
                     <tr>
                         <td class="ps-3">
                             <img src="${fotoUrl}" class="rounded-circle shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/150?text=Foto'">
                         </td>
                         <td class="fw-semibold">${m.POST_GRAD || '--'}</td>
-                        <td>${m.MATRICULA || '--'}</td>
                         <td>
                             <div class="fw-bold text-dark">${m.NOME_COMPLETO || m.NOME_GUERRA || '--'}</div>
                             <small class="text-muted">Guerra: ${m.NOME_GUERRA || '--'}</small>
                         </td>
+                        <td>${m.RG || '--'}</td>
+                        <td>${m.CPF || '--'}</td>
                         <td>${m.UNIDADE || '5º CR'}</td>
                         <td><span class="badge ${statusClass}">${m.STATUS || 'PRONTO'}</span></td>
                         <td class="text-end pe-3">
                             <button class="btn btn-outline-primary btn-sm me-1" onclick="abrirProntuario(${index})" title="Ver Cartão/Foto">
                                 <i class="fa-solid fa-id-card"></i>
                             </button>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="editarRegistro(${index})" title="Editar Cadastro">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="abrirEdicao(${index})" title="Editar Cadastro">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
                         </td>
@@ -365,7 +422,7 @@
                 else if(statusSel === 'TRANSFERIDO') matchStatus = st.includes('TRANSFERIDO');
                 else if(statusSel === 'AVNM') matchStatus = st.includes('AVNM');
 
-                let textoCompleto = `${m.NOME_COMPLETO} ${m.NOME_GUERRA} ${m.MATRICULA} ${m.POST_GRAD}`.toLowerCase();
+                let textoCompleto = `${m.NOME_COMPLETO} ${m.NOME_GUERRA} ${m.MATRICULA} ${m.RG} ${m.CPF} ${m.POST_GRAD}`.toLowerCase();
                 let matchBusca = textoCompleto.includes(busca);
 
                 return matchUnidade && matchStatus && matchBusca;
@@ -380,6 +437,8 @@
             document.getElementById('modal-nome').innerText = m.NOME_COMPLETO || m.NOME_GUERRA || '--';
             document.getElementById('modal-posto').innerText = m.POST_GRAD || '--';
             document.getElementById('modal-mat').innerText = m.MATRICULA || '--';
+            document.getElementById('modal-rg').innerText = m.RG || '--';
+            document.getElementById('modal-cpf').innerText = m.CPF || '--';
             document.getElementById('modal-unidade').innerText = m.UNIDADE || '--';
             document.getElementById('modal-status').innerText = m.STATUS || 'PRONTO';
             document.getElementById('modal-inclusao').innerText = m.INCLUSAO || '--';
@@ -388,9 +447,36 @@
             modal.show();
         }
 
-        function editarRegistro(index) {
+        function abrirEdicao(index) {
             let m = dadosGlobais[index];
-            alert(`Abrir edição para o militar: ${m.NOME_COMPLETO || m.MATRICULA}`);
+            document.getElementById('edit-index').value = index;
+            document.getElementById('edit-nome').value = m.NOME_COMPLETO || '';
+            document.getElementById('edit-rg').value = m.RG || '';
+            document.getElementById('edit-cpf').value = m.CPF || '';
+            document.getElementById('edit-posto').value = m.POST_GRAD || '';
+            document.getElementById('edit-status').value = m.STATUS || 'PRONTO';
+            document.getElementById('edit-unidade').value = m.UNIDADE || '';
+
+            let modal = new bootstrap.Modal(document.getElementById('modalEdicao'));
+            modal.show();
+        }
+
+        function salvarEdicao() {
+            let index = document.getElementById('edit-index').value;
+            dadosGlobais[index].NOME_COMPLETO = document.getElementById('edit-nome').value;
+            dadosGlobais[index].RG = document.getElementById('edit-rg').value;
+            dadosGlobais[index].CPF = document.getElementById('edit-cpf').value;
+            dadosGlobais[index].POST_GRAD = document.getElementById('edit-posto').value;
+            dadosGlobais[index].STATUS = document.getElementById('edit-status').value;
+            dadosGlobais[index].UNIDADE = document.getElementById('edit-unidade').value;
+
+            let modalEl = document.getElementById('modalEdicao');
+            let modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+
+            atualizarEstatisticas(dadosGlobais);
+            renderizarTabela(dadosGlobais);
+            alert("Alterações aplicadas com sucesso na visualização!");
         }
     </script>
 </body>
